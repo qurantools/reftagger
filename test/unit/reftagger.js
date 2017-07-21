@@ -1,18 +1,20 @@
 import Reftagger from '../../src/reftagger';
 
+
+
 describe('Reftagger', () => {
-  describe('Greet function', () => {
+  describe('tag function', () => {
     beforeEach(() => {
-      spy(Reftagger, 'greet');
-      Reftagger.greet();
+      spy(Reftagger, 'tag');
+      Reftagger.tag();
     });
 
     it('should have been run once', () => {
-      expect(Reftagger.greet).to.have.been.calledOnce;
+      expect(Reftagger.tag).to.have.been.calledOnce;
     });
 
     it('should have always returned hello', () => {
-      expect(Reftagger.greet).to.have.always.returned('hello');
+      expect(Reftagger.tag).to.have.always.returned('hello');
     });
   });
 });
