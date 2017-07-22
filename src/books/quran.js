@@ -185,13 +185,11 @@ function parse(input) {
   pattern = `
     (?:surat|سورة)?
     \\s*
-    (${chapterList})
+    (${chapterList}):?
     \\s*
-    (?:([\\d]{1,3})\\s*:)?
-    \\s*
-      (?:
-        ([\\d\\s\\-,]+)
-      )?
+      (?:([\\d]{1,3})\\s*:)?
+      \\s+
+      ([\\d\\s\\-,]+)
     `;
 
   regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
@@ -207,5 +205,5 @@ function parse(input) {
   return results;
 };
 
-export default parse;
-export { parse, getChapter };
+export default { parse, getChapter };
+export { getChapter, parse };

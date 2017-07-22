@@ -1,5 +1,6 @@
 global.chai = require('chai');
 global.sinon = require('sinon');
+global.jsdom = require('jsdom-global')();
 global.chai.use(require('sinon-chai'));
 
 require('babel-core/register');

@@ -8,12 +8,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
-    <!-- Place favicon.ico in the root directory -->
-
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/typeplate-starter-kit/3.0.1/css/typeplate.min.css">
 </head>
 
 <body>
@@ -21,10 +16,15 @@
       <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
     <![endif]-->
 
-    <p>You should read Surat An-Nas 3-5 as it has some cool insights.</p>
-    <p>فقوله - تعالى -: ﴿ اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ﴾، إخبار بأنه المنفرِد بالإلهية لجميع الخلائق، فلا معبود بحقٍّ إلاَّ هو - سبحانه - وهو المستَحق للعِبادة، وبهذه الكلمة أرْسَل الله الرُّسل، وأنزَل الكُتُب، وعليها قامت السماوات
-        والأرض، ومِن أجْلها خَلَق الله الجنَّة والنار؛ قال - تعالى -: ﴿ وَمَا أَرْسَلْنَا مِنْ قَبْلِكَ مِنْ رَسُولٍ إِلَّا نُوحِي إِلَيْهِ أَنَّهُ لَا إِلَهَ إِلَّا أَنَا فَاعْبُدُونِ ﴾ [الأنبياء: 25] وقال - تعالى -: ﴿ يُنَزِّلُ الْمَلَائِكَةَ بِالرُّوحِ
-        مِنْ أَمْرِهِ عَلَى مَنْ يَشَاءُ مِنْ عِبَادِهِ أَنْ أَنْذِرُوا أَنَّهُ لَا إِلَهَ إِلَّا أَنَا فَاتَّقُونِ ﴾ [النحل: 2].</p>
+    <div dir="ltr">
+        <p>You should read Surat An-Nas 3-5 as it has some cool insights.</p>
+    </div>
+
+    <div dir="rtl">
+        <p>فقوله - تعالى -: ﴿ اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ﴾، إخبار بأنه المنفرِد بالإلهية لجميع الخلائق، فلا معبود بحقٍّ إلاَّ هو - سبحانه - وهو المستَحق للعِبادة، وبهذه الكلمة أرْسَل الله الرُّسل، وأنزَل الكُتُب، وعليها قامت السماوات
+            والأرض، ومِن أجْلها خَلَق الله الجنَّة والنار؛ قال - تعالى -: ﴿ وَمَا أَرْسَلْنَا مِنْ قَبْلِكَ مِنْ رَسُولٍ إِلَّا نُوحِي إِلَيْهِ أَنَّهُ لَا إِلَهَ إِلَّا أَنَا فَاعْبُدُونِ ﴾ [الأنبياء: 25] وقال - تعالى -: ﴿ يُنَزِّلُ الْمَلَائِكَةَ بِالرُّوحِ
+            مِنْ أَمْرِهِ عَلَى مَنْ يَشَاءُ مِنْ عِبَادِهِ أَنْ أَنْذِرُوا أَنَّهُ لَا إِلَهَ إِلَّا أَنَا فَاتَّقُونِ ﴾ [النحل: 2].</p>
+    </div>
 
     <script>
         // Basic installation
@@ -33,8 +33,7 @@
         (function(d, t) {
             var g = d.createElement(t),
                 s = d.getElementsByTagName(t)[0];
-            // g.src = "//reftagger.alkotob.org/reftagger.min.js";
-            g.src = "https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.js";
+            g.src = "../dist/reftagger.min.js";
             s.parentNode.insertBefore(g, s);
         }(document, "script"));
     </script>
