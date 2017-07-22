@@ -16,7 +16,7 @@ sites that have Arabic Quranic / Biblical references.
 
 Adding Reftagger to your blog or website is easy. Just place a few lines of code
 into the footer of your template files. Copy the code from the text box below
-and paste it right before the closing body tag (</body>).
+and paste it right before the closing body tag (`</body>`).
 
 ```js
 <script>
