@@ -78,60 +78,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function createPopup() {
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	
+	function initTooltips() {
+	  // Append the tooltip template to the body
+	  document.body.innerHTML += _tooltip2.default;
+	
 	  var template = document.getElementById('alkotob-tooltip');
-	  var tip = (0, _tippy2.default)('.alkotob-ayah', {
+	  var tippy = Reftagger.tippy = (0, _tippy2.default)('.alkotob-ayah', {
 	    arrow: true,
 	    html: '#alkotob-tooltip',
 	    interactive: true,
+	    theme: Reftagger.settings.theme,
 	    flipDuration: 0, // prevent a transition once tooltip size changes and updates position
-	    onShow: function onShow(el) {
-	      var _this = this;
+	    onShow: function onShow() {
+	      if (tippy.loading) return;
+	      tippy.loading = true;
 	
-	      if (tip.loading) return;
-	      tip.loading = true;
+	      var el = tippy.getReferenceElement(this);
+	      var matchText = el.getAttribute('data-text');
+	      var bookType = el.getAttribute('data-type');
+	      var book = el.getAttribute('data-book');
+	      var chapter = el.getAttribute('data-chapter');
+	      var verses = el.getAttribute('data-verses');
 	
-	      console.log('initializing html');
+	      // Update the reference in the tooltip
+	      var reference = document.getElementById('alkotob-reference');
+	      reference.innerHTML = matchText.trim();
 	
-	      fetch('https://unsplash.it/200/?random').then(function (resp) {
-	        return resp.blob();
-	      }).then(function (blob) {
-	        var tipEl = tip.getReferenceElement(_this);
-	        var refData = tip.getReferenceData(tipEl);
-	        template.innerHTML = 'fjsdklfjdslkfjkdls ' + new Date();
-	        tip.loading = false;
-	        tip.update(_this);
-	      }).catch(function (e) {
-	        // template.innerHTML = 'Loading failed';
-	        tip.loading = false;
-	      });
+	      tippy.update(this);
+	
+	      // TODO: load the api request
+	      // fetch('https://unsplash.it/200/?random')
+	      //   .then(resp => resp.blob())
+	      //   .then(blob => {
+	      //     const refData = tippy.getReferenceData(el);
+	      //     template.innerHTML = `fjsdklfjdslkfjkdls ${new Date()}`;
+	      //     tippy.loading = false;
+	      //     tippy.update(this);
+	      //   }).catch(e => {
+	      //     // template.innerHTML = 'Loading failed';
+	      //     tippy.loading = false;
+	      //   });
+	    },
+	    onHide: function onHide() {
+	      tippy.loading = false;
 	    },
 	    onHidden: function onHidden() {
-	      console.log('reverting html');
 	      // template.innerHTML = 'loading';
 	    }
-	  }
-	  // prevent tooltip from displaying over button
-	  // popperOptions: {
-	  //   modifiers: {
-	  //     preventOverflow: {
-	  //       enabled: false
-	  //     },
-	  //     hide: {
-	  //       enabled: false
-	  //     }
-	  //   }
-	  // }
-	  );
+	  });
 	}
 	
 	var Reftagger = {
 	  initialized: false,
+	
+	  // Reference to the tippy.js object
+	  tippy: null,
+	
 	  settings: {
 	    onPageLoad: true,
 	    language: 'en',
 	    theme: 'light' // dark, light, transparent
 	  },
+	
+	  /**
+	   * Initializes the refTagger object and appends proper elements
+	   * to DOM and styles to DOM as well.
+	   */
 	  init: function init() {
 	    var self = this;
 	
@@ -154,9 +168,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    style.setAttribute('href', 'https://unpkg.com/tippy.js@1.1.3/dist/tippy.css'); // TODO: use own stylesheet
 	    document.getElementsByTagName('head')[0].appendChild(style);
 	
-	    // Append the tooltip template to the body
-	    document.body.innerHTML += _tooltip2.default;
-	
 	    // Tag references on page load
 	    if (self.settings.onPageLoad) {
 	      window.onload = function () {
@@ -169,19 +180,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    self.initialized = true;
 	  },
-	  tag: function tag() {
-	    var html = document.body.innerText;
-	    var quranMatches = _quran2.default.parse(html);
-	    quranMatches.forEach(function (match) {
-	      document.body.innerHTML = document.body.innerHTML.replace(match.replace, '<a href="#alkotob-tooltip" class="alkotob-ayah">' + match.replace + '</a>');
+	
+	
+	  /**
+	   * This is the primary init function that runs regex on the HTML to find
+	   * references. If a context is provided it will execute only within the
+	   * context, otherwise it will execute on the document body. If no context
+	   * is provided it will attempt to destroy previous matches so it doesn't
+	   * double insert.
+	   *
+	   * @param ctx Actual DOM context to perform updates
+	   */
+	  tag: function tag(ctx) {
+	    var context = ctx || document.body;
+	    var html = context.innerText;
+	    var queue = [];
+	
+	    queue.push.apply(queue, _toConsumableArray(_quran2.default.parse(html)));
+	
+	    queue.forEach(function (match) {
+	      var html = '<a href="#"\n        class="alkotob-ayah"\n        data-text="' + match.replace + '"\n        data-type="' + match.type + '"\n        data-book="' + (match.book || '') + '"\n        data-chapter="' + match.chapter + '"\n        data-verses="' + match.verses + '">\n          ' + match.replace + '\n        </a>';
+	
+	      // Replace each match with proper html
+	      context.innerHTML = context.innerHTML.replace(match.replace, html);
 	    });
 	
-	    createPopup();
+	    initTooltips();
+	  },
+	
+	
+	  /**
+	   * Destroys all the references that have been made on the page.
+	   */
+	  destroy: function destroy() {
+	    var references = document.querySelectorAll('.alkotob-ayah');
+	
+	    // Replace them with the original text
+	    for (var i = 0; i < references.length; i++) {
+	      references[i].outerHTML = references[i].innerHTML;
+	    }
 	  }
 	};
 	
-	// Add https://atomiks.github.io/tippyjs/
-	
+	// Initialize on script load
 	Reftagger.init();
 	
 	exports.default = Reftagger;
@@ -4246,7 +4287,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var template = "\n  <div id=\"alkotob-tooltip\" style=\"display: none;\">\n    <p>Loading data</p>\n  </div>\n";
+	var template = "\n  <div id=\"alkotob-tooltip\" style=\"display: none;\">\n    <div id=\"alkotob-reference\"></div>\n    <p>Loading data</p>\n  </div>\n";
 	
 	exports.default = template;
 
