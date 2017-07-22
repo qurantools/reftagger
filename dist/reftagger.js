@@ -64,21 +64,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _quran2 = _interopRequireDefault(_quran);
 	
-	var _oldTestament = __webpack_require__(3);
+	var _bible = __webpack_require__(3);
 	
-	var _oldTestament2 = _interopRequireDefault(_oldTestament);
-	
-	var _newTestament = __webpack_require__(4);
-	
-	var _newTestament2 = _interopRequireDefault(_newTestament);
+	var _bible2 = _interopRequireDefault(_bible);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var Reftagger = {
+	  initialized: false,
+	  settings: {
+	    onPageLoad: true
+	  },
+	  init: function init(options) {
+	    var self = this;
+	
+	    if (self.initialized) return;
+	
+	    // Update the settings with user defined values
+	    Object.keys(options).forEach(function (key) {
+	      if (typeof self.settings[key] !== 'undefined') {
+	        self.settings[key] = options[key];
+	      }
+	    });
+	
+	    // Append styles to document
+	    var style = document.createElement('link');
+	    style.setAttribute('rel', 'stylesheet');
+	    style.setAttribute('type', 'text/css');
+	    style.setAttribute('href', 'https://unpkg.com/tippy.js@1.1.3/dist/tippy.css'); // TODO: use own stylesheet
+	    document.getElementsByTagName('head')[0].appendChild(style);
+	
+	    // Tag references on page load
+	    if (self.settings.onPageLoad) {
+	      window.onload = function () {
+	        return Reftagger.tag();
+	      };
+	    }
+	
+	    self.initialized = true;
+	  },
 	  tag: function tag() {
+	    console.log('tagging on page load');
 	    return 'hello';
 	  }
 	};
+	
+	// Add https://atomiks.github.io/tippyjs/
 	
 	exports.default = Reftagger;
 
@@ -101,6 +132,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var chapters = [["Al-Fatihah", "The Opener", "الفاتحة"], ["Al-Baqarah", "The Cow", "البقرة"], ["Ali 'Imran", "Family of Imran", "آل عمران"], ["An-Nisa", "The Women", "النساء"], ["Al-Ma'idah", "The Table Spread", "المائدة"], ["Al-An'am", "The Cattle", "الأنعام"], ["Al-A'raf", "The Heights", "الأعراف"], ["Al-Anfal", "The Spoils of War", "الأنفال"], ["At-Tawbah", "The Repentance", "التوبة"], ["Yunus", "Jonah", "يونس"], ["Hud", "Hud", "هود"], ["Yusuf", "Joseph", "يوسف"], ["Ar-Ra'd", "The Thunder", "الرّعد"], ["Ibrahim", "Abrahim", "إبراهيم"], ["Al-Hijr", "The Rocky Tract", "الحجر"], ["An-Nahl", "The Bee", "النحل"], ["Al-Isra", "The Night Journey", "الإسراء"], ["Al-Kahf", "The Cave", "الكهف"], ["Maryam", "Mary", "مريم"], ["Taha", "Ta-Ha", "طه"], ["Al-Anbya", "The Prophets", "الأنبياء"], ["Al-Haj", "The Pilgrimage", "الحج"], ["Al-Mu'minun", "The Believers", "المؤمنون"], ["An-Nur", "The Light", "النّور"], ["Al-Furqan", "The Criterian", "الفرقان"], ["Ash-Shu'ara", "The Poets", "الشعراء"], ["An-Naml", "The Ant", "النمل"], ["Al-Qasas", "The Stories", "القصص"], ["Al-'Ankabut", "The Spider", "العنكبوت"], ["Ar-Rum", "The Romans", "الروم"], ["Luqman", "Luqman", "لقمان"], ["As-Sajdah", "The Prostration", "السجدة"], ["Al-Ahzab", "The Combined Forces", "الأحزاب"], ["Saba", "Sheba", "سبإ"], ["Fatir", "Originator", "فاطر"], ["Ya-Sin", "Ya Sin", "يس"], ["As-Saffat", "Those who set the Ranks", "الصّافّات"], ["Sad", "The Letter \"Saad\"", "ص"], ["Az-Zumar", "The Troops", "الزمر"], ["Ghafir", "The Forgiver", "غافر"], ["Fussilat", "Explained in Detail", "فصّلت"], ["Ash-Shuraa", "The Consultation", "الشورى"], ["Az-Zukhruf", "The Ornaments of Gold", "الزخرف"], ["Ad-Dukhan", "The Smoke", "الدخان"], ["Al-Jathiyah", "The Crouching", "الجاثية"], ["Al-Ahqaf", "The Wind-Curved Sandhills", "الأحقاف"], ["Muhammad", "Muhammad", "محمّـد"], ["Al-Fath", "The Victory", "الفتح"], ["Al-Hujurat", "The Rooms", "الحُـجُـرات"], ["Qaf", "The Letter \"Qaf\"", "ق"], ["Adh-Dhariyat", "The Winnowing Winds", "الذاريات"], ["At-Tur", "The Mount", "الـطور"], ["An-Najm", "The Star", "الـنحـم"], ["Al-Qamar", "The Moon", "الـقمـر"], ["Ar-Rahman", "The Beneficent", "الـرحـمـن"], ["Al-Waqi'ah", "The Inevitable", "الواقيـة"], ["Al-Hadid", "The Iron", "الحـديد"], ["Al-Mujadila", "The Pleading Woman", "الـمجادلـة"], ["Al-Hashr", "The Exile", "الـحـشـر"], ["Al-Mumtahanah", "She that is to be examined", "الـمـمـتـحنة"], ["As-Saf", "The Ranks", "الـصّـف"], ["Al-Jumu'ah", "The Congregation, Friday", "الـجـمـعـة"], ["Al-Munafiqun", "The Hypocrites", "الـمنافقون"], ["At-Taghabun", "The Mutual Disillusion", "الـتغابن"], ["At-Talaq", "The Divorce", "الـطلاق"], ["At-Tahrim", "The Prohibtiion", "الـتحريم"], ["Al-Mulk", "The Sovereignty", "الـملك"], ["Al-Qalam", "The Pen", "الـقـلـم"], ["Al-Haqqah", "The Reality", "الـحاقّـة"], ["Al-Ma'arij", "The Ascending Stairways", "الـمعارج"], ["Nuh", "Noah", "نوح"], ["Al-Jinn", "The Jinn", "الجن"], ["Al-Muzzammil", "The Enshrouded One", "الـمـزّمّـل"], ["Al-Muddaththir", "The Cloaked One", "الـمّـدّثّـر"], ["Al-Qiyamah", "The Resurrection", "الـقـيامـة"], ["Al-Insan", "The Man", "الإنسان"], ["Al-Mursalat", "The Emissaries", "الـمرسلات"], ["An-Naba", "The Tidings", "الـنبإ"], ["An-Nazi'at", "Those who drag forth", "الـنازعات"], ["'Abasa", "He Frowned", "عبس"], ["At-Takwir", "The Overthrowing", "التكوير"], ["Al-Infitar", "The Cleaving", "الانفطار"], ["Al-Mutaffifin", "The Defrauding", "المطـفـفين"], ["Al-Inshiqaq", "The Sundering", "الانشقاق"], ["Al-Buruj", "The Mansions of the Stars", "البروج"], ["At-Tariq", "The Nightcommer", "الـطارق"], ["Al-A'la", "The Most High", "الأعـلى"], ["Al-Ghashiyah", "The Overwhelming", "الغاشـيـة"], ["Al-Fajr", "The Dawn", "الفجر"], ["Al-Balad", "The City", "الـبلد"], ["Ash-Shams", "The Sun", "الـشـمـس"], ["Al-Layl", "The Night", "اللـيـل"], ["Ad-Duhaa", "The Morning Hours", "الضـحى"], ["Ash-Sharh", "The Relief", "الـشرح"], ["At-Tin", "The Fig", "الـتين"], ["Al-'Alaq", "The Clot", "الـعلق"], ["Al-Qadr", "The Power", "الـقدر"], ["Al-Bayyinah", "The Clear Proof", "الـبينة"], ["Az-Zalzalah", "The Earthquake", "الـزلزلة"], ["Al-'Adiyat", "The Courser", "الـعاديات"], ["Al-Qari'ah", "The Calamity", "الـقارعـة"], ["At-Takathur", "The Rivalry in world increase", "الـتكاثر"], ["Al-'Asr", "The Declining Day", "الـعصر"], ["Al-Humazah", "The Traducer", "الـهمزة"], ["Al-Fil", "The Elephant", "الـفيل"], ["Quraysh", "Quraysh", "قريش"], ["Al-Ma'un", "The Small Kindesses", "المـاعون"], ["Al-Kawthar", "The Abundance", "الـكوثر"], ["Al-Kafirun", "The Disbelievers", "الـكافرون"], ["An-Nasr", "The Divine Support", "الـنصر"], ["Al-Masad", "The Palm Fiber", "الـمسد"], ["Al-Ikhlas", "The Sincerity", "الإخلاص"], ["Al-Falaq", "The Daybreak", "الـفلق"], ["An-Nas", "The Mankind", "الـناس"]];
 	
+	// Make the array lowercase so its not case-sensitive
+	chapters = chapters.map(function (list) {
+	  return list.map(function (book) {
+	    return book.toLowerCase().trim();
+	  });
+	});
+	
 	function getChapter(chapter) {
 	  var c = parseInt(chapter);
 	
@@ -111,13 +149,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  // Attempt to find it in the array
 	  chapters.forEach(function (b, idx) {
-	    if (b.indexOf(chapter.trim()) !== -1) {
+	    if (b.indexOf(chapter.toLowerCase().trim()) !== -1) {
 	      // Do +1 as array starts at zero
 	      bookIndex = idx + 1;
 	    }
 	  });
 	
-	  return bookIndex;
+	  // For consistency lets stick to strings
+	  return bookIndex.toString();
 	}
 	
 	function parse(input) {
@@ -148,8 +187,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  /**
-	   * <chapter> 3: 21
-	   * <chapter> 21-25
+	   * <ar|en chapter> 3: 21
+	   * <ar|en chapter> 21-25
 	   */
 	  var chapterList = chapters.map(function (variations) {
 	    return variations.map(function (bookName) {
@@ -202,22 +241,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var OldTestament = {};
+	var Bible = {};
 	
-	exports.default = OldTestament;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var NewTestament = {};
-	
-	exports.default = NewTestament;
+	exports.default = Bible;
 
 /***/ }
 /******/ ])

@@ -53,9 +53,10 @@ describe('Quran', () => {
 
   describe('getChapter()', () => {
     it('should return proper book numbers', () => {
-      expect(getChapter('An-Nisa')).to.equal(4);
-      expect(getChapter('The Rocky Tract')).to.equal(15);
-      expect(getChapter('الـفلق')).to.equal(113);
+      expect(getChapter('An-Nisa')).to.equal('4');
+      expect(getChapter('an-nisa')).to.equal('4');
+      expect(getChapter('The rocky Tract')).to.equal('15');
+      expect(getChapter('الـفلق')).to.equal('113');
     });
   });
 });

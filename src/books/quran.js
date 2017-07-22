@@ -1,6 +1,6 @@
 import escape from 'escape-string-regexp';
 
-const chapters = [
+let chapters = [
   ["Al-Fatihah", "The Opener", "الفاتحة"],
   ["Al-Baqarah", "The Cow", "البقرة"],
   ["Ali 'Imran", "Family of Imran", "آل عمران"],
@@ -117,6 +117,9 @@ const chapters = [
   ["An-Nas", "The Mankind", "الـناس"],
 ];
 
+// Make the array lowercase so its not case-sensitive
+chapters = chapters.map(list => list.map(book => book.toLowerCase().trim()));
+
 function getChapter(chapter) {
   const c = parseInt(chapter);
 
@@ -127,13 +130,14 @@ function getChapter(chapter) {
 
   // Attempt to find it in the array
   chapters.forEach((b, idx) => {
-    if (b.indexOf(chapter.trim()) !== -1) {
+    if (b.indexOf(chapter.toLowerCase().trim()) !== -1) {
       // Do +1 as array starts at zero
       bookIndex = idx + 1;
     }
   });
 
-  return bookIndex;
+  // For consistency lets stick to strings
+  return bookIndex.toString();
 }
 
 function parse(input) {
@@ -171,8 +175,8 @@ function parse(input) {
   }
 
   /**
-   * <chapter> 3: 21
-   * <chapter> 21-25
+   * <ar|en chapter> 3: 21
+   * <ar|en chapter> 21-25
    */
   const chapterList = chapters.map(variations => {
     return variations.map(bookName => escape(bookName)).join('|');
