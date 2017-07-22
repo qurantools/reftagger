@@ -84,7 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Append the tooltip template to the body
 	  document.body.innerHTML += _tooltip2.default;
 	
+	  // Setup references to update elements
 	  var template = document.getElementById('alkotob-tooltip');
+	  var reference = document.getElementById('alkotob-reference');
+	
 	  var tippy = Reftagger.tippy = (0, _tippy2.default)('.alkotob-ayah', {
 	    arrow: true,
 	    html: '#alkotob-tooltip',
@@ -103,7 +106,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var verses = el.getAttribute('data-verses');
 	
 	      // Update the reference in the tooltip
-	      var reference = document.getElementById('alkotob-reference');
 	      reference.innerHTML = matchText.trim();
 	
 	      tippy.update(this);
@@ -136,9 +138,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Reference to the tippy.js object
 	  tippy: null,
 	
+	  // Settings (defaults) to configure Reftagger
 	  settings: {
 	    onPageLoad: true,
-	    language: 'en',
 	    theme: 'light' // dark, light, transparent
 	  },
 	

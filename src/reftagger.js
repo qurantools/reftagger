@@ -7,7 +7,10 @@ function initTooltips() {
   // Append the tooltip template to the body
   document.body.innerHTML += tooltipHTML;
 
+  // Setup references to update elements
   const template = document.getElementById('alkotob-tooltip');
+  const reference = document.getElementById('alkotob-reference');
+
   const tippy = Reftagger.tippy = Tippy('.alkotob-ayah', {
     arrow: true,
     html: '#alkotob-tooltip',
@@ -26,7 +29,6 @@ function initTooltips() {
       const verses = el.getAttribute('data-verses');
 
       // Update the reference in the tooltip
-      const reference = document.getElementById('alkotob-reference');
       reference.innerHTML = matchText.trim();
 
       tippy.update(this);
@@ -61,9 +63,9 @@ const Reftagger = {
   // Reference to the tippy.js object
   tippy: null,
 
+  // Settings (defaults) to configure Reftagger
   settings: {
     onPageLoad: true,
-    language: 'en',
     theme: 'light' // dark, light, transparent
   },
 
