@@ -20,20 +20,20 @@ and paste it right before the closing body tag (`</body>`).
 
 ```js
 <script>
-  (function(d, t) {
-    var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
-    // g.src = "//reftagger.alkotob.org/reftagger.min.js";
-    g.src = "https://raw.githubusercontent.com/alkotob/reftagger/master/dist/reftagger.min.js";
-    s.parentNode.insertBefore(g, s);
-  }(document, "script"));
-
   // Basic installation
-  Reftagger.init();
+  var refTagger = {};
 
   // Configuration options and defaults
-  Reftagger.init({
+  var refTagger = {
     onPageLoad: true // Load tags on page load
-  });
+  };
+
+  (function(d, t) {
+    var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+     // g.src = "//reftagger.alkotob.org/reftagger.min.js";
+    g.src = "https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.js";
+    s.parentNode.insertBefore(g, s);
+  }(document, "script"));
 </script>
 ```
 

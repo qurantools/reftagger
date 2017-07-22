@@ -6,10 +6,13 @@ const Reftagger = {
   settings: {
     onPageLoad: true
   },
-  init(options) {
+  init() {
     let self = this;
 
     if (self.initialized) return;
+
+    // Start working on the options
+    let options = window.refTagger || {};
 
     // Update the settings with user defined values
     Object.keys(options).forEach(key => {
@@ -30,6 +33,9 @@ const Reftagger = {
       window.onload = () => Reftagger.tag();
     }
 
+    // Override the root object
+    window.refTagger = self;
+
     self.initialized = true;
   },
   tag() {
@@ -39,5 +45,7 @@ const Reftagger = {
 };
 
 // Add https://atomiks.github.io/tippyjs/
+
+Reftagger.init();
 
 export default Reftagger;

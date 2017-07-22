@@ -75,10 +75,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  settings: {
 	    onPageLoad: true
 	  },
-	  init: function init(options) {
+	  init: function init() {
 	    var self = this;
 	
 	    if (self.initialized) return;
+	
+	    // Start working on the options
+	    var options = window.refTagger || {};
 	
 	    // Update the settings with user defined values
 	    Object.keys(options).forEach(function (key) {
@@ -101,6 +104,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    }
 	
+	    // Override the root object
+	    window.refTagger = self;
+	
 	    self.initialized = true;
 	  },
 	  tag: function tag() {
@@ -110,6 +116,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	// Add https://atomiks.github.io/tippyjs/
+	
+	Reftagger.init();
 	
 	exports.default = Reftagger;
 
