@@ -14,7 +14,28 @@ sites that have Arabic Quranic / Biblical references.
 
 ## Installation
 
-[COMING SOON]
+Adding Reftagger to your blog or website is easy. Just place a few lines of code
+into the footer of your template files. Copy the code from the text box below
+and paste it right before the closing body tag (</body>).
+
+```
+<script>
+	(function(d, t) {
+		var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+		// g.src = "//reftagger.alkotob.org/reftagger.min.js";
+		g.src = "https://raw.githubusercontent.com/alkotob/reftagger/master/dist/reftagger.min.js";
+		s.parentNode.insertBefore(g, s);
+	}(document, "script"));
+
+  // Basic installation
+  Reftagger.init();
+
+  // Configuration options and defaults
+  Reftagger.init({
+		onPageLoad: true // Load tags on page load
+  });
+</script>
+```
 
 ## Tooltips
 
