@@ -60,6 +60,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
 	var _tippy = __webpack_require__(1);
 	
 	var _tippy2 = _interopRequireDefault(_tippy);
@@ -68,164 +70,312 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _quran2 = _interopRequireDefault(_quran);
 	
-	var _bible = __webpack_require__(4);
+	var _bible = __webpack_require__(5);
 	
 	var _bible2 = _interopRequireDefault(_bible);
 	
-	var _tooltip = __webpack_require__(5);
+	var _tooltip = __webpack_require__(6);
 	
 	var _tooltip2 = _interopRequireDefault(_tooltip);
+	
+	var _domIterator = __webpack_require__(7);
+	
+	var _domIterator2 = _interopRequireDefault(_domIterator);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 	
-	function initTooltips() {
-	  // Append the tooltip template to the body
-	  document.body.innerHTML += _tooltip2.default;
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	  // Setup references to update elements
-	  var template = document.getElementById('alkotob-tooltip');
-	  var reference = document.getElementById('alkotob-reference');
+	/**
+	 * The main entry point for the reftagger of Alkotob
+	 */
+	var Reftagger = function () {
+	  function Reftagger(ctx) {
+	    _classCallCheck(this, Reftagger);
 	
-	  var tippy = Reftagger.tippy = (0, _tippy2.default)('.alkotob-ayah', {
-	    arrow: true,
-	    html: '#alkotob-tooltip',
-	    interactive: true,
-	    theme: Reftagger.settings.theme,
-	    flipDuration: 0, // prevent a transition once tooltip size changes and updates position
-	    onShow: function onShow() {
-	      if (tippy.loading) return;
-	      tippy.loading = true;
+	    this._initialized = false;
+	    this._tippy = null;
+	    this._iterator;
+	    this._ctx = ctx;
 	
-	      var el = tippy.getReferenceElement(this);
-	      var matchText = el.getAttribute('data-text');
-	      var bookType = el.getAttribute('data-type');
-	      var book = el.getAttribute('data-book');
-	      var chapter = el.getAttribute('data-chapter');
-	      var verses = el.getAttribute('data-verses');
-	
-	      // Update the reference in the tooltip
-	      reference.innerHTML = matchText.trim();
-	
-	      tippy.update(this);
-	
-	      // TODO: load the api request
-	      // fetch('https://unsplash.it/200/?random')
-	      //   .then(resp => resp.blob())
-	      //   .then(blob => {
-	      //     const refData = tippy.getReferenceData(el);
-	      //     template.innerHTML = `fjsdklfjdslkfjkdls ${new Date()}`;
-	      //     tippy.loading = false;
-	      //     tippy.update(this);
-	      //   }).catch(e => {
-	      //     // template.innerHTML = 'Loading failed';
-	      //     tippy.loading = false;
-	      //   });
-	    },
-	    onHide: function onHide() {
-	      tippy.loading = false;
-	    },
-	    onHidden: function onHidden() {
-	      // template.innerHTML = 'loading';
-	    }
-	  });
-	}
-	
-	var Reftagger = {
-	  initialized: false,
-	
-	  // Reference to the tippy.js object
-	  tippy: null,
-	
-	  // Settings (defaults) to configure Reftagger
-	  settings: {
-	    onPageLoad: true,
-	    theme: 'light' // dark, light, transparent
-	  },
+	    // Initialize the default settings for the class
+	    this._settings = {
+	      onPageLoad: true,
+	      iframes: true, // From match.js
+	      exclude: [], // From match.js
+	      theme: 'light' // dark, light, transparent, <custom>
+	    };
+	  }
 	
 	  /**
-	   * Initializes the refTagger object and appends proper elements
-	   * to DOM and styles to DOM as well.
+	   * Utility function for accessing the settings
 	   */
-	  init: function init() {
-	    var self = this;
 	
-	    if (self.initialized) return;
 	
-	    // Start working on the options
-	    var options = window.refTagger || {};
+	  _createClass(Reftagger, [{
+	    key: 'init',
 	
-	    // Update the settings with user defined values
-	    Object.keys(options).forEach(function (key) {
-	      if (typeof self.settings[key] !== 'undefined') {
-	        self.settings[key] = options[key];
+	
+	    /**
+	     * Initializes the functionality on the page, called within the library
+	     * for initial page load and looks for the settings variable on the page.
+	     */
+	    value: function init() {
+	      var self = this;
+	      if (this._initialized) return;
+	
+	      // Start working on the options
+	      var options = typeof window.refTagger !== 'undefined' ? window.refTagger : {};
+	
+	      // Update the settings with user defined values
+	      Object.keys(options).forEach(function (key) {
+	        if (typeof self._settings[key] !== 'undefined') {
+	          self._settings[key] = options[key];
+	        }
+	      });
+	
+	      // Override the root object
+	      window.refTagger = self;
+	
+	      self._initDOMDependencies();
+	
+	      // Tag references on page load
+	      if (self.settings.onPageLoad) {
+	        window.onload = function () {
+	          return self.tag();
+	        };
 	      }
-	    });
 	
-	    // Append styles to document
-	    var style = document.createElement('link');
-	    style.setAttribute('rel', 'stylesheet');
-	    style.setAttribute('type', 'text/css');
-	    style.setAttribute('href', 'https://unpkg.com/tippy.js@1.1.3/dist/tippy.css'); // TODO: use own stylesheet
-	    document.getElementsByTagName('head')[0].appendChild(style);
-	
-	    // Tag references on page load
-	    if (self.settings.onPageLoad) {
-	      window.onload = function () {
-	        return Reftagger.tag();
-	      };
+	      self._initialized = true;
 	    }
 	
-	    // Override the root object
-	    window.refTagger = self;
+	    /**
+	     * This is the primary init function that runs regex on the HTML to find
+	     * references. If a context is provided it will execute only within the
+	     * context, otherwise it will execute on the document body. If no context
+	     * is provided it will attempt to destroy previous matches so it doesn't
+	     * double insert.
+	     *
+	     * @param ctx Actual DOM context to perform updates
+	     */
 	
-	    self.initialized = true;
-	  },
+	  }, {
+	    key: 'tag',
+	    value: function tag(ctx) {
+	      var _this = this;
 	
+	      // TODO: implement DOM for ctx
+	      var nodes = this._getTextNodes();
 	
-	  /**
-	   * This is the primary init function that runs regex on the HTML to find
-	   * references. If a context is provided it will execute only within the
-	   * context, otherwise it will execute on the document body. If no context
-	   * is provided it will attempt to destroy previous matches so it doesn't
-	   * double insert.
-	   *
-	   * @param ctx Actual DOM context to perform updates
-	   */
-	  tag: function tag(ctx) {
-	    var context = ctx || document.body;
-	    var html = context.innerText;
-	    var queue = [];
+	      nodes.forEach(function (node) {
+	        var references = [];
 	
-	    queue.push.apply(queue, _toConsumableArray(_quran2.default.parse(html)));
+	        // Parse out all the references
+	        references.push.apply(references, _toConsumableArray(_quran2.default.parse(node.textContent)));
 	
-	    queue.forEach(function (match) {
-	      var html = '<a href="#"\n        class="alkotob-ayah"\n        data-text="' + match.replace + '"\n        data-type="' + match.type + '"\n        data-book="' + (match.book || '') + '"\n        data-chapter="' + match.chapter + '"\n        data-verses="' + match.verses + '">\n          ' + match.replace + '\n        </a>';
+	        references.reverse() // Reverse the DOM manipulation cause it splits nodes
+	        .forEach(function (ref) {
+	          return _this._wrapReference(node, ref);
+	        });
+	      });
+	
+	      this._initTooltips();
+	    }
+	
+	    /**
+	     * Destroys all the references that have been made on the page.
+	     */
+	
+	  }, {
+	    key: 'destroy',
+	    value: function destroy() {
+	      var references = document.querySelectorAll('.alkotob-ayah');
+	
+	      // Replace them with the original text
+	      for (var i = 0; i < references.length; i++) {
+	        references[i].outerHTML = references[i].innerHTML;
+	      }
+	    }
+	
+	    /**
+	     * Adds necessary elements to DOM
+	     */
+	
+	  }, {
+	    key: '_initDOMDependencies',
+	    value: function _initDOMDependencies() {
+	      var style = document.createElement('link');
+	      style.setAttribute('rel', 'stylesheet');
+	      style.setAttribute('type', 'text/css');
+	      style.setAttribute('href', 'https://unpkg.com/tippy.js@1.1.3/dist/tippy.css'); // TODO: use own stylesheet
+	      document.getElementsByTagName('head')[0].appendChild(style);
+	
+	      // Append the tooltip template to the body
+	      document.body.innerHTML += _tooltip2.default;
+	    }
+	
+	    /**
+	     * Retrieves the text nodes that will contain references
+	     */
+	
+	  }, {
+	    key: '_getTextNodes',
+	    value: function _getTextNodes() {
+	      var _this2 = this;
+	
+	      var nodes = [];
+	
+	      this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
+	        nodes.push(node);
+	      }, function (node) {
+	        if (_this2._matchesExclude(node.parentNode)) {
+	          return NodeFilter.FILTER_REJECT;
+	        } else {
+	          return NodeFilter.FILTER_ACCEPT;
+	        }
+	      });
+	
+	      return nodes;
+	    }
+	
+	    /**
+	     * Wraps the instance element and class around matches that fit the start
+	     * and end positions within the node
+	     * @param  {HTMLElement} node - The DOM text node
+	     * @return {Reference} Reference to replace it with
+	     */
+	
+	  }, {
+	    key: '_wrapReference',
+	    value: function _wrapReference(node, ref) {
+	      var startIdx = node.textContent.indexOf(ref.text);
+	      if (startIdx === -1) return;
+	
+	      var startNode = node.splitText(startIdx);
+	
+	      var refEl = document.createElement('a');
+	      refEl.setAttribute('href', '#');
+	      refEl.setAttribute('class', 'alkotob-ayah');
+	      refEl.setAttribute('data-text', ref.text);
+	      refEl.setAttribute('data-type', ref.type);
+	      refEl.setAttribute('data-book', ref.book);
+	      refEl.setAttribute('data-chapter', ref.chapter);
+	      refEl.setAttribute('data-verses', ref.verses);
+	      refEl.textContent = ref.text;
+	
+	      // Get rid of actual text in following node
+	      startNode.textContent = startNode.textContent.replace(ref.text, '');
+	
+	      // Insert it before the tailing statement
+	      startNode.parentNode.insertBefore(refEl, startNode);
 	
 	      // Replace each match with proper html
-	      context.innerHTML = context.innerHTML.replace(match.replace, html);
-	    });
-	
-	    initTooltips();
-	  },
-	
-	
-	  /**
-	   * Destroys all the references that have been made on the page.
-	   */
-	  destroy: function destroy() {
-	    var references = document.querySelectorAll('.alkotob-ayah');
-	
-	    // Replace them with the original text
-	    for (var i = 0; i < references.length; i++) {
-	      references[i].outerHTML = references[i].innerHTML;
+	      // console.log(startNode);
 	    }
-	  }
-	};
+	
+	    /**
+	     * Checks if an element matches any of the specified exclude selectors. Also
+	     * it checks for elements in which no marks should be performed (e.g.
+	     * script and style tags) and optionally already marked elements
+	     * @param  {HTMLElement} el - The element to check
+	     * @return {boolean}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: '_matchesExclude',
+	    value: function _matchesExclude(el) {
+	      return _domIterator2.default.matches(el, this.settings.exclude.concat([
+	      // ignores the elements itself, not their childrens (selector *)
+	      "script", "style", "title", "head", "html"]));
+	    }
+	
+	    /**
+	     * Inits tooltips across the site by looping through text elements and
+	     * replacing it with reference tips.
+	     */
+	
+	  }, {
+	    key: '_initTooltips',
+	    value: function _initTooltips() {
+	      var self = this;
+	
+	      // Setup references to update elements
+	      var template = document.getElementById('alkotob-tooltip');
+	      var reference = document.getElementById('alkotob-reference');
+	
+	      self._tippy = (0, _tippy2.default)('.alkotob-ayah', {
+	        arrow: true,
+	        html: '#alkotob-tooltip',
+	        interactive: true,
+	        theme: self.settings.theme,
+	        flipDuration: 0, // prevent a transition once tooltip size changes and updates position
+	        onShow: function onShow() {
+	          if (self._tippy.loading) return;
+	          self._tippy.loading = true;
+	
+	          var el = self._tippy.getReferenceElement(this);
+	          var matchText = el.getAttribute('data-text');
+	          var bookType = el.getAttribute('data-type');
+	          var book = el.getAttribute('data-book');
+	          var chapter = el.getAttribute('data-chapter');
+	          var verses = el.getAttribute('data-verses');
+	
+	          // Update the reference in the tooltip
+	          reference.innerHTML = matchText.trim();
+	
+	          self._tippy.update(this);
+	
+	          // TODO: load the api request
+	          // fetch('https://unsplash.it/200/?random')
+	          //   .then(resp => resp.blob())
+	          //   .then(blob => {
+	          //     const refData = self._tippy.getReferenceData(el);
+	          //     template.innerHTML = `fjsdklfjdslkfjkdls ${new Date()}`;
+	          //     self._tippy.loading = false;
+	          //     self._tippy.update(this);
+	          //   }).catch(e => {
+	          //     // template.innerHTML = 'Loading failed';
+	          //     self._tippy.loading = false;
+	          //   });
+	        },
+	        onHide: function onHide() {
+	          self._tippy.loading = false;
+	        },
+	        onHidden: function onHidden() {
+	          // template.innerHTML = 'loading';
+	        }
+	      });
+	    }
+	  }, {
+	    key: 'settings',
+	    get: function get() {
+	      return this._settings;
+	    }
+	
+	    /**
+	     * An instance of DOMIterator
+	     * @type {DOMIterator}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: 'iterator',
+	    get: function get() {
+	      return new _domIterator2.default(this._ctx || document, this.settings.iframes, this.settings.exclude);
+	    }
+	  }]);
+	
+	  return Reftagger;
+	}();
 	
 	// Initialize on script load
-	Reftagger.init();
+	
+	
+	var tagger = new Reftagger();
+	tagger.init();
 	
 	exports.default = Reftagger;
 
@@ -4152,7 +4302,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -4162,6 +4312,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _escapeStringRegexp = __webpack_require__(3);
 	
 	var _escapeStringRegexp2 = _interopRequireDefault(_escapeStringRegexp);
+	
+	var _reference = __webpack_require__(4);
+	
+	var _reference2 = _interopRequireDefault(_reference);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -4209,16 +4363,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Koran 1:111
 	   * Qur'an 1:111
 	   */
-	  pattern = "\n    (?:q|quran|koran|qur\\'an)\n      \\s*\n      ([\\d]{1,3})\n      (?::\\s*\n        ([\\d\\s\\-,]+)\n      )?\n    ";
+	  pattern = '\n    (?:q|quran|koran|qur\\\'an)\n      \\s*\n      ([\\d]{1,3})\n      (?::\\s*\n        ([\\d\\s\\-,]+)\n      )?\n    ';
 	
 	  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
 	  while (match = regex.exec(input)) {
-	    results.push({
-	      replace: match[0].trim(),
-	      type: 'quran',
-	      chapter: getChapter(match[1]),
-	      verses: typeof match[2] === 'undefined' ? null : match[2].replace(/\s/g, '')
-	    });
+	    var ref = new _reference2.default();
+	
+	    ref.text = match[0];
+	    ref.type = 'quran';
+	    ref.chapter = getChapter(match[1]);
+	    ref.verses = match[2];
+	
+	    results.push(ref);
 	  }
 	
 	  /**
@@ -4231,16 +4387,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).join('|');
 	  }).join('|');
 	
-	  pattern = "\n    (?:surat|\u0633\u0648\u0631\u0629)?\n    \\s*\n    (" + chapterList + "):?\n    \\s*\n      (?:([\\d]{1,3})\\s*:)?\n      \\s+\n      ([\\d\\s\\-,]+)\n    ";
+	  pattern = '\n    (?:surat|\u0633\u0648\u0631\u0629)?\n    \\s*\n    (' + chapterList + '):?\n    \\s*\n      (?:([\\d]{1,3})\\s*:)?\n      \\s+\n      ([\\d\\s\\-,]+)\n    ';
 	
 	  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
 	  while (match = regex.exec(input)) {
-	    results.push({
-	      replace: match[0].trim(),
-	      type: 'quran',
-	      chapter: getChapter(match[2] || match[1]),
-	      verses: typeof match[3] === 'undefined' ? null : match[3].replace(/\s/g, '')
-	    });
+	    var _ref = new _reference2.default();
+	
+	    _ref.text = match[0];
+	    _ref.type = 'quran';
+	    _ref.chapter = getChapter(match[2] || match[1]);
+	    _ref.verses = match[3];
+	
+	    results.push(_ref);
 	  }
 	
 	  return results;
@@ -4271,14 +4429,85 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var Bible = {};
 	
-	exports.default = Bible;
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Reference = function () {
+	  function Reference() {
+	    _classCallCheck(this, Reference);
+	
+	    this._opts = {
+	      text: null,
+	      type: null,
+	      book: null,
+	      chapter: null,
+	      verses: null
+	    };
+	  }
+	
+	  _createClass(Reference, [{
+	    key: 'text',
+	    set: function set(val) {
+	      this._opts.text = val.trim();
+	    },
+	    get: function get() {
+	      return this._opts.text;
+	    }
+	  }, {
+	    key: 'type',
+	    set: function set(type) {
+	      if (['quran', 'bible'].indexOf(type) === -1) {
+	        throw 'You must specify a proper book type';
+	      }
+	
+	      this._opts.type = type;
+	    },
+	    get: function get() {
+	      return this._opts.type;
+	    }
+	  }, {
+	    key: 'chapter',
+	    set: function set(num) {
+	      this._opts.chapter = num.toString();
+	    },
+	    get: function get() {
+	      return this._opts.chapter;
+	    }
+	  }, {
+	    key: 'book',
+	    set: function set(name) {
+	      this._opts.book = name.trim();
+	    },
+	    get: function get() {
+	      return this._opts.book;
+	    }
+	  }, {
+	    key: 'verses',
+	    set: function set(str) {
+	      if (typeof str === 'undefined') return;
+	      this._opts.verses = str.toString().replace(/\s/g, '');
+	    },
+	    get: function get() {
+	      return this._opts.verses;
+	    }
+	  }, {
+	    key: 'options',
+	    get: function get() {
+	      return this._opts;
+	    }
+	  }]);
+	
+	  return Reference;
+	}();
+	
+	exports.default = Reference;
 
 /***/ },
 /* 5 */
@@ -4289,9 +4518,687 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var Bible = {};
+	
+	exports.default = Bible;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	var template = "\n  <div id=\"alkotob-tooltip\" style=\"display: none;\">\n    <div id=\"alkotob-reference\"></div>\n    <p>Loading data</p>\n  </div>\n";
 	
 	exports.default = template;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	/**
+	 * A NodeIterator with iframes support and a method to check if an element is
+	 * matching a specified selector
+	 * @example
+	 * const iterator = new DOMIterator(
+	 *     document.querySelector("#context"), true
+	 * );
+	 * iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+	 *     console.log(node);
+	 * }, node => {
+	 *     if(DOMIterator.matches(node.parentNode, ".ignore")){
+	 *         return NodeFilter.FILTER_REJECT;
+	 *     } else {
+	 *         return NodeFilter.FILTER_ACCEPT;
+	 *     }
+	 * }, () => {
+	 *     console.log("DONE");
+	 * });
+	 * @todo Outsource into separate repository and include it in the build
+	 */
+	var DOMIterator = function () {
+	
+	  /**
+	   * @param {HTMLElement|HTMLElement[]|NodeList|string} ctx - The context DOM
+	   * element, an array of DOM elements, a NodeList or a selector
+	   * @param {boolean} [iframes=true] - A boolean indicating if iframes should
+	   * be handled
+	   * @param {string[]} [exclude=[]] - An array containing exclusion selectors
+	   * for iframes
+	   * @param {number} [iframesTimeout=5000] - A number indicating the ms to
+	   * wait before an iframe should be skipped, in case the load event isn't
+	   * fired. This also applies if the user is offline and the resource of the
+	   * iframe is online (either by the browsers "offline" mode or because
+	   * there's no internet connection)
+	   */
+	  function DOMIterator(ctx) {
+	    var iframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+	    var exclude = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+	    var iframesTimeout = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 5000;
+	
+	    _classCallCheck(this, DOMIterator);
+	
+	    /**
+	     * The context of the instance. Either a DOM element, an array of DOM
+	     * elements, a NodeList or a selector
+	     * @type {HTMLElement|HTMLElement[]|NodeList|string}
+	     * @access protected
+	     */
+	    this.ctx = ctx;
+	    /**
+	     * Boolean indicating if iframe support is enabled
+	     * @type {boolean}
+	     * @access protected
+	     */
+	    this.iframes = iframes;
+	    /**
+	     * An array containing exclusion selectors for iframes
+	     * @type {string[]}
+	     */
+	    this.exclude = exclude;
+	    /**
+	     * The maximum ms to wait for a load event before skipping an iframe
+	     * @type {number}
+	     */
+	    this.iframesTimeout = iframesTimeout;
+	  }
+	
+	  /**
+	   * Checks if the specified DOM element matches the selector
+	   * @param  {HTMLElement} element - The DOM element
+	   * @param  {string|string[]} selector - The selector or an array with
+	   * selectors
+	   * @return {boolean}
+	   * @access public
+	   */
+	
+	
+	  _createClass(DOMIterator, [{
+	    key: "getContexts",
+	
+	
+	    /**
+	     * Returns all contexts filtered by duplicates (even nested)
+	     * @return {HTMLElement[]} - An array containing DOM contexts
+	     * @access protected
+	     */
+	    value: function getContexts() {
+	      var ctx = void 0,
+	          filteredCtx = [];
+	      if (typeof this.ctx === "undefined" || !this.ctx) {
+	        // e.g. null
+	        ctx = [];
+	      } else if (NodeList.prototype.isPrototypeOf(this.ctx)) {
+	        ctx = Array.prototype.slice.call(this.ctx);
+	      } else if (Array.isArray(this.ctx)) {
+	        ctx = this.ctx;
+	      } else if (typeof this.ctx === "string") {
+	        ctx = Array.prototype.slice.call(document.querySelectorAll(this.ctx));
+	      } else {
+	        // e.g. HTMLElement or element inside iframe
+	        ctx = [this.ctx];
+	      }
+	      // filter duplicate text nodes
+	      ctx.forEach(function (ctx) {
+	        var isDescendant = filteredCtx.filter(function (contexts) {
+	          return contexts.contains(ctx);
+	        }).length > 0;
+	        if (filteredCtx.indexOf(ctx) === -1 && !isDescendant) {
+	          filteredCtx.push(ctx);
+	        }
+	      });
+	      return filteredCtx;
+	    }
+	
+	    /**
+	     * @callback DOMIterator~getIframeContentsSuccessCallback
+	     * @param {HTMLDocument} contents - The contentDocument of the iframe
+	     */
+	    /**
+	     * Calls the success callback function with the iframe document. If it can't
+	     * be accessed it calls the error callback function
+	     * @param {HTMLElement} ifr - The iframe DOM element
+	     * @param {DOMIterator~getIframeContentsSuccessCallback} successFn
+	     * @param {function} [errorFn]
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "getIframeContents",
+	    value: function getIframeContents(ifr, successFn) {
+	      var errorFn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {};
+	
+	      var doc = void 0;
+	      try {
+	        var ifrWin = ifr.contentWindow;
+	        doc = ifrWin.document;
+	        if (!ifrWin || !doc) {
+	          // no permission = null. Undefined in Phantom
+	          throw new Error("iframe inaccessible");
+	        }
+	      } catch (e) {
+	        errorFn();
+	      }
+	      if (doc) {
+	        successFn(doc);
+	      }
+	    }
+	
+	    /**
+	     * Checks if an iframe is empty (if about:blank is the shown page)
+	     * @param {HTMLElement} ifr - The iframe DOM element
+	     * @return {boolean}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "isIframeBlank",
+	    value: function isIframeBlank(ifr) {
+	      var bl = "about:blank",
+	          src = ifr.getAttribute("src").trim(),
+	          href = ifr.contentWindow.location.href;
+	      return href === bl && src !== bl && src;
+	    }
+	
+	    /**
+	     * Observes the onload event of an iframe and calls the success callback or
+	     * the error callback if the iframe is inaccessible. If the event isn't
+	     * fired within the specified {@link DOMIterator#iframesTimeout}, then it'll
+	     * call the error callback too
+	     * @param {HTMLElement} ifr - The iframe DOM element
+	     * @param {DOMIterator~getIframeContentsSuccessCallback} successFn
+	     * @param {function} errorFn
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "observeIframeLoad",
+	    value: function observeIframeLoad(ifr, successFn, errorFn) {
+	      var _this = this;
+	
+	      var called = false,
+	          tout = null;
+	      var listener = function listener() {
+	        if (called) {
+	          return;
+	        }
+	        called = true;
+	        clearTimeout(tout);
+	        try {
+	          if (!_this.isIframeBlank(ifr)) {
+	            ifr.removeEventListener("load", listener);
+	            _this.getIframeContents(ifr, successFn, errorFn);
+	          }
+	        } catch (e) {
+	          // isIframeBlank maybe throws throws an error
+	          errorFn();
+	        }
+	      };
+	      ifr.addEventListener("load", listener);
+	      tout = setTimeout(listener, this.iframesTimeout);
+	    }
+	
+	    /**
+	     * Callback when the iframe is ready
+	     * @callback DOMIterator~onIframeReadySuccessCallback
+	     * @param {HTMLDocument} contents - The contentDocument of the iframe
+	     */
+	    /**
+	     * Callback if the iframe can't be accessed
+	     * @callback DOMIterator~onIframeReadyErrorCallback
+	     */
+	    /**
+	     * Calls the callback if the specified iframe is ready for DOM access
+	     * @param  {HTMLElement} ifr - The iframe DOM element
+	     * @param  {DOMIterator~onIframeReadySuccessCallback} successFn - Success
+	     * callback
+	     * @param {DOMIterator~onIframeReadyErrorCallback} errorFn - Error callback
+	     * @see {@link http://stackoverflow.com/a/36155560/3894981} for
+	     * background information
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "onIframeReady",
+	    value: function onIframeReady(ifr, successFn, errorFn) {
+	      try {
+	        if (ifr.contentWindow.document.readyState === "complete") {
+	          if (this.isIframeBlank(ifr)) {
+	            this.observeIframeLoad(ifr, successFn, errorFn);
+	          } else {
+	            this.getIframeContents(ifr, successFn, errorFn);
+	          }
+	        } else {
+	          this.observeIframeLoad(ifr, successFn, errorFn);
+	        }
+	      } catch (e) {
+	        // accessing document failed
+	        errorFn();
+	      }
+	    }
+	
+	    /**
+	     * Callback when all iframes are ready for DOM access
+	     * @callback DOMIterator~waitForIframesDoneCallback
+	     */
+	    /**
+	     * Iterates over all iframes and calls the done callback when all of them
+	     * are ready for DOM access (including nested ones)
+	     * @param {HTMLElement} ctx - The context DOM element
+	     * @param {DOMIterator~waitForIframesDoneCallback} done - Done callback
+	     */
+	
+	  }, {
+	    key: "waitForIframes",
+	    value: function waitForIframes(ctx, done) {
+	      var _this2 = this;
+	
+	      var eachCalled = 0;
+	      this.forEachIframe(ctx, function () {
+	        return true;
+	      }, function (ifr) {
+	        eachCalled++;
+	        _this2.waitForIframes(ifr.querySelector("html"), function () {
+	          if (! --eachCalled) {
+	            done();
+	          }
+	        });
+	      }, function (handled) {
+	        if (!handled) {
+	          done();
+	        }
+	      });
+	    }
+	
+	    /**
+	     * Callback allowing to filter an iframe. Must return true when the element
+	     * should remain, otherwise false
+	     * @callback DOMIterator~forEachIframeFilterCallback
+	     * @param {HTMLElement} iframe - The iframe DOM element
+	     */
+	    /**
+	     * Callback for each iframe content
+	     * @callback DOMIterator~forEachIframeEachCallback
+	     * @param {HTMLElement} content - The iframe document
+	     */
+	    /**
+	     * Callback if all iframes inside the context were handled
+	     * @callback DOMIterator~forEachIframeEndCallback
+	     * @param {number} handled - The number of handled iframes (those who
+	     * wheren't filtered)
+	     */
+	    /**
+	     * Iterates over all iframes inside the specified context and calls the
+	     * callbacks when they're ready. Filters iframes based on the instance
+	     * exclusion selectors
+	     * @param {HTMLElement} ctx - The context DOM element
+	     * @param {DOMIterator~forEachIframeFilterCallback} filter - Filter callback
+	     * @param {DOMIterator~forEachIframeEachCallback} each - Each callback
+	     * @param {DOMIterator~forEachIframeEndCallback} [end] - End callback
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "forEachIframe",
+	    value: function forEachIframe(ctx, filter, each) {
+	      var _this3 = this;
+	
+	      var end = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
+	
+	      var ifr = ctx.querySelectorAll("iframe"),
+	          open = ifr.length,
+	          handled = 0;
+	      ifr = Array.prototype.slice.call(ifr);
+	      var checkEnd = function checkEnd() {
+	        if (--open <= 0) {
+	          end(handled);
+	        }
+	      };
+	      if (!open) {
+	        checkEnd();
+	      }
+	      ifr.forEach(function (ifr) {
+	        if (DOMIterator.matches(ifr, _this3.exclude)) {
+	          checkEnd();
+	        } else {
+	          _this3.onIframeReady(ifr, function (con) {
+	            if (filter(ifr)) {
+	              handled++;
+	              each(con);
+	            }
+	            checkEnd();
+	          }, checkEnd);
+	        }
+	      });
+	    }
+	
+	    /**
+	     * Creates a NodeIterator on the specified context
+	     * @see {@link https://developer.mozilla.org/en/docs/Web/API/NodeIterator}
+	     * @param {HTMLElement} ctx - The context DOM element
+	     * @param {DOMIterator~whatToShow} whatToShow
+	     * @param {DOMIterator~filterCb} filter
+	     * @return {NodeIterator}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "createIterator",
+	    value: function createIterator(ctx, whatToShow, filter) {
+	      return document.createNodeIterator(ctx, whatToShow, filter, false);
+	    }
+	
+	    /**
+	     * Creates an instance of DOMIterator in an iframe
+	     * @param {HTMLDocument} contents - Iframe document
+	     * @return {DOMIterator}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "createInstanceOnIframe",
+	    value: function createInstanceOnIframe(contents) {
+	      return new DOMIterator(contents.querySelector("html"), this.iframes);
+	    }
+	
+	    /**
+	     * Checks if an iframe occurs between two nodes, more specifically if an
+	     * iframe occurs before the specified node and after the specified prevNode
+	     * @param {HTMLElement} node - The node that should occur after the iframe
+	     * @param {HTMLElement} prevNode - The node that should occur before the
+	     * iframe
+	     * @param {HTMLElement} ifr - The iframe to check against
+	     * @return {boolean}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "compareNodeIframe",
+	    value: function compareNodeIframe(node, prevNode, ifr) {
+	      var compCurr = node.compareDocumentPosition(ifr),
+	          prev = Node.DOCUMENT_POSITION_PRECEDING;
+	      if (compCurr & prev) {
+	        if (prevNode !== null) {
+	          var compPrev = prevNode.compareDocumentPosition(ifr),
+	              after = Node.DOCUMENT_POSITION_FOLLOWING;
+	          if (compPrev & after) {
+	            return true;
+	          }
+	        } else {
+	          return true;
+	        }
+	      }
+	      return false;
+	    }
+	
+	    /**
+	     * @typedef {DOMIterator~getIteratorNodeReturn}
+	     * @type {object.<string>}
+	     * @property {HTMLElement} prevNode - The previous node or null if there is
+	     * no
+	     * @property {HTMLElement} node - The current node
+	     */
+	    /**
+	     * Returns the previous and current node of the specified iterator
+	     * @param {NodeIterator} itr - The iterator
+	     * @return {DOMIterator~getIteratorNodeReturn}
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "getIteratorNode",
+	    value: function getIteratorNode(itr) {
+	      var prevNode = itr.previousNode();
+	      var node = void 0;
+	      if (prevNode === null) {
+	        node = itr.nextNode();
+	      } else {
+	        node = itr.nextNode() && itr.nextNode();
+	      }
+	      return {
+	        prevNode: prevNode,
+	        node: node
+	      };
+	    }
+	
+	    /**
+	     * An array containing objects. The object key "val" contains an iframe
+	     * DOM element. The object key "handled" contains a boolean indicating if
+	     * the iframe was handled already.
+	     * It wouldn't be enough to save all open or all already handled iframes.
+	     * The information of open iframes is necessary because they may occur after
+	     * all other text nodes (and compareNodeIframe would never be true). The
+	     * information of already handled iframes is necessary as otherwise they may
+	     * be handled multiple times
+	     * @typedef DOMIterator~checkIframeFilterIfr
+	     * @type {object[]}
+	     */
+	    /**
+	     * Checks if an iframe wasn't handled already and if so, calls
+	     * {@link DOMIterator#compareNodeIframe} to check if it should be handled.
+	     * Information wheter an iframe was or wasn't handled is given within the
+	     * <code>ifr</code> dictionary
+	     * @param {HTMLElement} node - The node that should occur after the iframe
+	     * @param {HTMLElement} prevNode - The node that should occur before the
+	     * iframe
+	     * @param {HTMLElement} currIfr - The iframe to check
+	     * @param {DOMIterator~checkIframeFilterIfr} ifr - The iframe dictionary.
+	     * Will be manipulated (by reference)
+	     * @return {boolean} Returns true when it should be handled, otherwise false
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "checkIframeFilter",
+	    value: function checkIframeFilter(node, prevNode, currIfr, ifr) {
+	      var key = false,
+	          // false === doesn't exist
+	      handled = false;
+	      ifr.forEach(function (ifrDict, i) {
+	        if (ifrDict.val === currIfr) {
+	          key = i;
+	          handled = ifrDict.handled;
+	        }
+	      });
+	      if (this.compareNodeIframe(node, prevNode, currIfr)) {
+	        if (key === false && !handled) {
+	          ifr.push({
+	            val: currIfr,
+	            handled: true
+	          });
+	        } else if (key !== false && !handled) {
+	          ifr[key].handled = true;
+	        }
+	        return true;
+	      }
+	      if (key === false) {
+	        ifr.push({
+	          val: currIfr,
+	          handled: false
+	        });
+	      }
+	      return false;
+	    }
+	
+	    /**
+	     * Creates an iterator on all open iframes in the specified array and calls
+	     * the end callback when finished
+	     * @param {DOMIterator~checkIframeFilterIfr} ifr
+	     * @param {DOMIterator~whatToShow} whatToShow
+	     * @param  {DOMIterator~forEachNodeCallback} eCb - Each callback
+	     * @param {DOMIterator~filterCb} fCb
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "handleOpenIframes",
+	    value: function handleOpenIframes(ifr, whatToShow, eCb, fCb) {
+	      var _this4 = this;
+	
+	      ifr.forEach(function (ifrDict) {
+	        if (!ifrDict.handled) {
+	          _this4.getIframeContents(ifrDict.val, function (con) {
+	            _this4.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb);
+	          });
+	        }
+	      });
+	    }
+	
+	    /**
+	     * Iterates through all nodes in the specified context and handles iframe
+	     * nodes at the correct position
+	     * @param {DOMIterator~whatToShow} whatToShow
+	     * @param {HTMLElement} ctx - The context
+	     * @param  {DOMIterator~forEachNodeCallback} eachCb - Each callback
+	     * @param {DOMIterator~filterCb} filterCb - Filter callback
+	     * @param {DOMIterator~forEachNodeEndCallback} doneCb - End callback
+	     * @access protected
+	     */
+	
+	  }, {
+	    key: "iterateThroughNodes",
+	    value: function iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
+	      var _this5 = this;
+	
+	      var itr = this.createIterator(ctx, whatToShow, filterCb);
+	      var ifr = [],
+	          elements = [],
+	          node = void 0,
+	          prevNode = void 0,
+	          retrieveNodes = function retrieveNodes() {
+	        var _getIteratorNode = _this5.getIteratorNode(itr);
+	
+	        prevNode = _getIteratorNode.prevNode;
+	        node = _getIteratorNode.node;
+	
+	        return node;
+	      };
+	      while (retrieveNodes()) {
+	        if (this.iframes) {
+	          this.forEachIframe(ctx, function (currIfr) {
+	            // note that ifr will be manipulated here
+	            return _this5.checkIframeFilter(node, prevNode, currIfr, ifr);
+	          }, function (con) {
+	            _this5.createInstanceOnIframe(con).forEachNode(whatToShow, function (ifrNode) {
+	              return elements.push(ifrNode);
+	            }, filterCb);
+	          });
+	        }
+	        // it's faster to call the each callback in an array loop
+	        // than in this while loop
+	        elements.push(node);
+	      }
+	      elements.forEach(function (node) {
+	        eachCb(node);
+	      });
+	      if (this.iframes) {
+	        this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
+	      }
+	      doneCb();
+	    }
+	
+	    /**
+	     * Callback for each node
+	     * @callback DOMIterator~forEachNodeCallback
+	     * @param {HTMLElement} node - The DOM text node element
+	     */
+	    /**
+	     * Callback if all contexts were handled
+	     * @callback DOMIterator~forEachNodeEndCallback
+	     */
+	    /**
+	     * Iterates over all contexts and initializes
+	     * {@link DOMIterator#iterateThroughNodes iterateThroughNodes} on them
+	     * @param {DOMIterator~whatToShow} whatToShow
+	     * @param  {DOMIterator~forEachNodeCallback} each - Each callback
+	     * @param {DOMIterator~filterCb} filter - Filter callback
+	     * @param {DOMIterator~forEachNodeEndCallback} done - End callback
+	     * @access public
+	     */
+	
+	  }, {
+	    key: "forEachNode",
+	    value: function forEachNode(whatToShow, each, filter) {
+	      var _this6 = this;
+	
+	      var done = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
+	
+	      var contexts = this.getContexts();
+	      var open = contexts.length;
+	      if (!open) {
+	        done();
+	      }
+	      contexts.forEach(function (ctx) {
+	        var ready = function ready() {
+	          _this6.iterateThroughNodes(whatToShow, ctx, each, filter, function () {
+	            if (--open <= 0) {
+	              // call end all contexts were handled
+	              done();
+	            }
+	          });
+	        };
+	        // wait for iframes to avoid recursive calls, otherwise this would
+	        // perhaps reach the recursive function call limit with many nodes
+	        if (_this6.iframes) {
+	          _this6.waitForIframes(ctx, ready);
+	        } else {
+	          ready();
+	        }
+	      });
+	    }
+	
+	    /**
+	     * Callback to filter nodes. Can return e.g. NodeFilter.FILTER_ACCEPT or
+	     * NodeFilter.FILTER_REJECT
+	     * @see {@link http://tinyurl.com/zdczmm2}
+	     * @callback DOMIterator~filterCb
+	     * @param {HTMLElement} node - The node to filter
+	     */
+	    /**
+	     * @typedef DOMIterator~whatToShow
+	     * @see {@link http://tinyurl.com/zfqqkx2}
+	     * @type {number}
+	     */
+	
+	  }], [{
+	    key: "matches",
+	    value: function matches(element, selector) {
+	      var selectors = typeof selector === "string" ? [selector] : selector,
+	          fn = element.matches || element.matchesSelector || element.msMatchesSelector || element.mozMatchesSelector || element.oMatchesSelector || element.webkitMatchesSelector;
+	      if (fn) {
+	        var match = false;
+	        selectors.every(function (sel) {
+	          if (fn.call(element, sel)) {
+	            match = true;
+	            return false;
+	          }
+	          return true;
+	        });
+	        return match;
+	      } else {
+	        // may be false e.g. when el is a textNode
+	        return false;
+	      }
+	    }
+	  }]);
+	
+	  return DOMIterator;
+	}();
+	
+	exports.default = DOMIterator;
 
 /***/ }
 /******/ ])

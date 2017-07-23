@@ -1,0 +1,62 @@
+class Reference {
+  constructor() {
+    this._opts = {
+      text: null,
+      type: null,
+      book: null,
+      chapter: null,
+      verses: null
+    };
+  }
+
+  set text(val) {
+    this._opts.text = val.trim();
+  }
+
+  set type(type) {
+    if (['quran', 'bible'].indexOf(type) === -1) {
+      throw 'You must specify a proper book type';
+    }
+
+    this._opts.type = type;
+  }
+
+  set chapter(num) {
+    this._opts.chapter = num.toString();
+  }
+
+  set book(name) {
+    this._opts.book = name.trim();
+  }
+
+  set verses(str) {
+    if (typeof str === 'undefined') return;
+    this._opts.verses = str.toString().replace(/\s/g, '');
+  }
+
+  get options() {
+    return this._opts;
+  }
+
+  get text() {
+    return this._opts.text;
+  }
+
+  get type() {
+    return this._opts.type;
+  }
+
+  get book() {
+    return this._opts.book;
+  }
+
+  get chapter() {
+    return this._opts.chapter;
+  }
+
+  get verses() {
+    return this._opts.verses;
+  }
+}
+
+export default Reference;

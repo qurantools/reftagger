@@ -1,4 +1,5 @@
 import escape from 'escape-string-regexp';
+import Reference from '../lib/reference';
 
 let chapters = [
   ["Al-Fatihah", "The Opener", "الفاتحة"],
@@ -166,12 +167,14 @@ function parse(input) {
 
   regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
   while (match = regex.exec(input)) {
-    results.push({
-      replace: match[0].trim(),
-      type: 'quran',
-      chapter: getChapter(match[1]),
-      verses: (typeof match[2] === 'undefined') ? null : match[2].replace(/\s/g, '')
-    });
+    let ref = new Reference();
+
+    ref.text = match[0];
+    ref.type = 'quran';
+    ref.chapter = getChapter(match[1]);
+    ref.verses = match[2];
+
+    results.push(ref);
   }
 
   /**
@@ -194,12 +197,14 @@ function parse(input) {
 
   regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
   while (match = regex.exec(input)) {
-    results.push({
-      replace: match[0].trim(),
-      type: 'quran',
-      chapter: getChapter(match[2] || match[1]),
-      verses: (typeof match[3] === 'undefined') ? null : match[3].replace(/\s/g, '')
-    });
+    let ref = new Reference();
+
+    ref.text = match[0];
+    ref.type = 'quran';
+    ref.chapter = getChapter(match[2] || match[1]);
+    ref.verses = match[3];
+
+    results.push(ref);
   }
 
   return results;
