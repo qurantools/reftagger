@@ -19,7 +19,7 @@ class Reftagger {
       onPageLoad: true,
       iframes: true, // From match.js
       exclude: [], // From match.js
-      theme: 'light', // dark, light, transparent, <custom>
+      theme: 'alkotob', // dark, light, transparent, <custom>
     };
   }
 

@@ -12,7 +12,7 @@ const mochaGlobals = require('./test/setup/.globals');
 const manifest = require('./package.json');
 
 const banner = `/*!
- * ${manifest.name} ${manifest.version}
+ * ${manifest.name} v${manifest.version}
  * ${manifest.description}
  * ${manifest.homepage}
  *

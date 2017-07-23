@@ -1,5 +1,5 @@
 /*!
- * reftagger 0.0.1
+ * reftagger v0.0.1
  * A reftagger for Arabic Holy Books.
  * https://github.com/alkotob/reftagger
  *
@@ -114,7 +114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      onPageLoad: true,
 	      iframes: true, // From match.js
 	      exclude: [], // From match.js
-	      theme: 'light' // dark, light, transparent, <custom>
+	      theme: 'alkotob' // dark, light, transparent, <custom>
 	    };
 	  }
 
