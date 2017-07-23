@@ -1,6 +1,10 @@
 import escape from 'escape-string-regexp';
 import Reference from '../lib/reference';
 
+function normalize(str) {
+  return str.toLowerCase().trim();
+}
+
 let chapters = [
   ["Al-Fatihah", "The Opener", "الفاتحة"],
   ["Al-Baqarah", "The Cow", "البقرة"],
@@ -119,10 +123,11 @@ let chapters = [
 ];
 
 // Make the array lowercase so its not case-sensitive
-chapters = chapters.map(list => list.map(book => book.toLowerCase().trim()));
+chapters = chapters.map(list => list.map(book => normalize(book)));
 
 function getChapter(chapter) {
   const c = parseInt(chapter);
+  chapter = normalize(chapter);
 
   // Chapter is already a number
   if (!isNaN(c)) return c;
@@ -131,9 +136,10 @@ function getChapter(chapter) {
 
   // Attempt to find it in the array
   chapters.forEach((b, idx) => {
-    if (b.indexOf(chapter.toLowerCase().trim()) !== -1) {
+    if (b.indexOf(chapter) !== -1) {
       // Do +1 as array starts at zero
       bookIndex = idx + 1;
+      return;
     }
   });
 
@@ -156,16 +162,11 @@ function parse(input) {
    * Koran 1:111
    * Qur'an 1:111
    */
-  pattern = `
-    (?:q|quran|koran|qur\\\'an)
-      \\s*
-      ([\\d]{1,3})
-      (?::\\s*
-        ([\\d\\s\\-,]+)
-      )?
-    `;
+  pattern = '(?:q|quran|koran|qur\\\'an)\\s*';
+  pattern += '([\\d]{1,3})';
+  pattern += '(?::\\s*([\\d\\s\\-,]+))?';
 
-  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
+  regex = new RegExp(pattern, 'gi');
   while (match = regex.exec(input)) {
     let ref = new Reference();
 
@@ -186,17 +187,12 @@ function parse(input) {
     return variations.map(bookName => escape(bookName)).join('|');
   }).join('|');
 
-  pattern = `
-    (?:surat|سورة)?
-    \\s*
-    (${chapterList}):?
-    \\s*
-      (?:([\\d]{1,3})\\s*:)?
-      \\s+
-      ([\\d\\s\\-,]+)
-    `;
+  pattern = '(?:surat|سورة)?\\s*';
+  pattern += `(${chapterList}):?\\s*`;
+  pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
+  pattern += '([\\d\\s\\-,]+)';
 
-  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
+  regex = new RegExp(pattern, 'gi');
   while (match = regex.exec(input)) {
     let ref = new Reference();
 

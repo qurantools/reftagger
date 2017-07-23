@@ -4,6 +4,10 @@ const refVariations = `
   Ps 139: 1-2
   Psalm 139: 1-2
   Psalms 139 :10-150
+  Esther 10: 1
+  1 Peter 1:14
+  1 Cor 3: 15-40, 10
+  The Revelation 10
 `.split(/\n/).filter(item => !!item).map(item => item.trim());
 
 describe('Bible', () => {

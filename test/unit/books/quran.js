@@ -37,6 +37,8 @@ const refVariations = `
   المائدة 10:10
   سورة فاطر 155
 
+  The Disbelievers 10
+  Al-Kafirun 11
   An-Nisa 10
   An-Nisa 1:10
   Surat An-Nisa 10:100-101,112
