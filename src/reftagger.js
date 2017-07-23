@@ -172,9 +172,6 @@ class Reftagger {
 
     // Insert it before the tailing statement
     startNode.parentNode.insertBefore(refEl, startNode);
-
-    // Replace each match with proper html
-    // console.log(startNode);
   }
 
   /**
