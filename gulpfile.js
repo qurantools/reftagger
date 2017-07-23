@@ -93,7 +93,7 @@ function build() {
 function styles() {
   return gulp.src(path.join('src', 'styles', 'styles.scss'))
     .pipe($.sass({ outputStyle: 'compressed' }).on('error', $.sass.logError))
-    .pipe($.rename('styles.min.css'))
+    .pipe($.rename('reftagger.min.css'))
     .pipe($.banner(banner))
     .pipe(gulp.dest(destinationFolder))
 }

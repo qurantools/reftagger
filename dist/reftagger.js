@@ -221,7 +221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var style = document.createElement('link');
 	      style.setAttribute('rel', 'stylesheet');
 	      style.setAttribute('type', 'text/css');
-	      style.setAttribute('href', 'https://unpkg.com/tippy.js@1.1.3/dist/tippy.css'); // TODO: use own stylesheet
+	      style.setAttribute('href', 'https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.css'); // TODO: use own domain
 	      document.getElementsByTagName('head')[0].appendChild(style);
 
 	      // Append the tooltip template to the body
