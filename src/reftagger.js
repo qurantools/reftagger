@@ -120,10 +120,11 @@ class Reftagger {
     let style = document.createElement('link');
     style.setAttribute('rel', 'stylesheet');
     style.setAttribute('type', 'text/css');
-    style.setAttribute('href', 'https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.css'); // TODO: use own domain
+    // style.setAttribute('href', 'https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.css'); // TODO: use own domain
+    style.setAttribute('href', '/dist/reftagger.min.css');
     document.getElementsByTagName('head')[0].appendChild(style);
 
-    // Append the tooltip template to the body
+    // Append tooltip html
     document.body.innerHTML += tooltipHTML;
   }
 
@@ -159,13 +160,15 @@ class Reftagger {
     const startNode = node.splitText(startIdx);
 
     let refEl = document.createElement('a');
-    refEl.setAttribute('href', '#');
+    refEl.setAttribute('href', ref.permalink);
+    refEl.setAttribute('target', '_blank');
     refEl.setAttribute('class', 'alkotob-ayah');
     refEl.setAttribute('data-text', ref.text);
     refEl.setAttribute('data-type', ref.type);
     refEl.setAttribute('data-book', ref.book);
     refEl.setAttribute('data-chapter', ref.chapter);
     refEl.setAttribute('data-verses', ref.verses);
+    refEl.setAttribute('data-permalink', ref.permalink);
     refEl.textContent = ref.text;
 
     // Get rid of actual text in following node
@@ -202,6 +205,7 @@ class Reftagger {
     const reference = document.getElementById('alkotob-reference');
 
     self._tippy = Tippy('.alkotob-ayah', {
+      position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
       interactive: true,
@@ -217,6 +221,15 @@ class Reftagger {
         const book = el.getAttribute('data-book');
         const chapter = el.getAttribute('data-chapter');
         const verses = el.getAttribute('data-verses');
+        const permalink = el.getAttribute('data-permalink');
+
+        // Update the social media buttons
+        const fb = document.getElementById('alkotob-social-fb');
+        fb.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(permalink)}`);
+        const tw = document.getElementById('alkotob-social-tw');
+        tw.setAttribute('href', `https://twitter.com/intent/tweet?url=${encodeURIComponent(permalink)}`);
+        const read = document.getElementById('alkotob-readmore-link');
+        read.setAttribute('href', permalink);
 
         // Update the reference in the tooltip
         reference.innerHTML = matchText.trim();

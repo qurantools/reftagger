@@ -61,6 +61,18 @@ class Reference {
   get verses() {
     return this._opts.verses;
   }
+
+  get permalink() {
+    let url;
+
+    if (this._opts.type === 'quran') {
+      url = `https://alkotob.org/quran/${this.chapter}/${this.verses}`;
+    } else {
+      url = `https://alkotob.org/bible/${this.book}/${this.chapter}/${this.verses}`;
+    }
+
+    return url;
+  }
 }
 
 export default Reference;

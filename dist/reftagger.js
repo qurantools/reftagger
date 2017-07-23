@@ -221,10 +221,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var style = document.createElement('link');
 	      style.setAttribute('rel', 'stylesheet');
 	      style.setAttribute('type', 'text/css');
-	      style.setAttribute('href', 'https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.css'); // TODO: use own domain
+	      // style.setAttribute('href', 'https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.css'); // TODO: use own domain
+	      style.setAttribute('href', '/dist/reftagger.min.css');
 	      document.getElementsByTagName('head')[0].appendChild(style);
 
-	      // Append the tooltip template to the body
+	      // Append tooltip html
 	      document.body.innerHTML += _tooltip2.default;
 	    }
 
@@ -268,13 +269,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var startNode = node.splitText(startIdx);
 
 	      var refEl = document.createElement('a');
-	      refEl.setAttribute('href', '#');
+	      refEl.setAttribute('href', ref.permalink);
+	      refEl.setAttribute('target', '_blank');
 	      refEl.setAttribute('class', 'alkotob-ayah');
 	      refEl.setAttribute('data-text', ref.text);
 	      refEl.setAttribute('data-type', ref.type);
 	      refEl.setAttribute('data-book', ref.book);
 	      refEl.setAttribute('data-chapter', ref.chapter);
 	      refEl.setAttribute('data-verses', ref.verses);
+	      refEl.setAttribute('data-permalink', ref.permalink);
 	      refEl.textContent = ref.text;
 
 	      // Get rid of actual text in following node
@@ -316,6 +319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var reference = document.getElementById('alkotob-reference');
 
 	      self._tippy = (0, _tippy2.default)('.alkotob-ayah', {
+	        position: 'auto',
 	        arrow: true,
 	        html: '#alkotob-tooltip',
 	        interactive: true,
@@ -331,6 +335,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var book = el.getAttribute('data-book');
 	          var chapter = el.getAttribute('data-chapter');
 	          var verses = el.getAttribute('data-verses');
+	          var permalink = el.getAttribute('data-permalink');
+
+	          // Update the social media buttons
+	          var fb = document.getElementById('alkotob-social-fb');
+	          fb.setAttribute('href', 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(permalink));
+	          var tw = document.getElementById('alkotob-social-tw');
+	          tw.setAttribute('href', 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(permalink));
+	          var read = document.getElementById('alkotob-readmore-link');
+	          read.setAttribute('href', permalink);
 
 	          // Update the reference in the tooltip
 	          reference.innerHTML = matchText.trim();
@@ -4517,6 +4530,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    get: function get() {
 	      return this._opts;
 	    }
+	  }, {
+	    key: 'permalink',
+	    get: function get() {
+	      var url = void 0;
+
+	      if (this._opts.type === 'quran') {
+	        url = 'https://alkotob.org/quran/' + this.chapter + '/' + this.verses;
+	      } else {
+	        url = 'https://alkotob.org/bible/' + this.book + '/' + this.chapter + '/' + this.verses;
+	      }
+
+	      return url;
+	    }
 	  }]);
 
 	  return Reference;
@@ -4645,7 +4671,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var template = "\n  <div id=\"alkotob-tooltip\" style=\"display: none;\">\n    <div id=\"alkotob-reference\"></div>\n    <p>Loading data</p>\n  </div>\n";
+	var template = "\n  <div id=\"alkotob-tooltip\" style=\"display: none;\">\n    <div id=\"alkotob-share\">\n      <a id=\"alkotob-social-fb\" href=\"#\" target=\"_blank\" class=\"social facebook\" title=\"Facebook\"><svg viewBox=\"0 0 512 512\"><path d=\"M211.9 197.4h-36.7v59.9h36.7V433.1h70.5V256.5h49.2l5.2-59.1h-54.4c0 0 0-22.1 0-33.7 0-13.9 2.8-19.5 16.3-19.5 10.9 0 38.2 0 38.2 0V82.9c0 0-40.2 0-48.8 0 -52.5 0-76.1 23.1-76.1 67.3C211.9 188.8 211.9 197.4 211.9 197.4z\"/></svg><!--[if lt IE 9]><em>Facebook</em><![endif]--></a>\n      <a id=\"alkotob-social-tw\" href=\"#\" target=\"_blank\" class=\"social twitter\" title=\"Twitter\"><svg viewBox=\"0 0 512 512\"><path d=\"M419.6 168.6c-11.7 5.2-24.2 8.7-37.4 10.2 13.4-8.1 23.8-20.8 28.6-36 -12.6 7.5-26.5 12.9-41.3 15.8 -11.9-12.6-28.8-20.6-47.5-20.6 -42 0-72.9 39.2-63.4 79.9 -54.1-2.7-102.1-28.6-134.2-68 -17 29.2-8.8 67.5 20.1 86.9 -10.7-0.3-20.7-3.3-29.5-8.1 -0.7 30.2 20.9 58.4 52.2 64.6 -9.2 2.5-19.2 3.1-29.4 1.1 8.3 25.9 32.3 44.7 60.8 45.2 -27.4 21.4-61.8 31-96.4 27 28.8 18.5 63 29.2 99.8 29.2 120.8 0 189.1-102.1 185-193.6C399.9 193.1 410.9 181.7 419.6 168.6z\"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a>\n    </div>\n    <div id=\"alkotob-reference\"></div>\n    <div class=\"bismillah\">\uFDFD</div>\n    <div id=\"alkotob-verse-text\">\n      \u0641\u0642\u0648\u0644\u0647 - \u062A\u0639\u0627\u0644\u0649 -: \uFD3F \u0627\u0644\u0644\u064E\u0651\u0647\u064F \u0644\u064E\u0627 \u0625\u0650\u0644\u064E\u0647\u064E \u0625\u0650\u0644\u064E\u0651\u0627 \u0647\u064F\u0648\u064E \u0627\u0644\u0652\u062D\u064E\u064A\u064F\u0651 \u0627\u0644\u0652\u0642\u064E\u064A\u064F\u0651\u0648\u0645\u064F \uFD3E\u060C \u0625\u062E\u0628\u0627\u0631 \u0628\u0623\u0646\u0647 \u0627\u0644\u0645\u0646\u0641\u0631\u0650\u062F \u0628\u0627\u0644\u0625\u0644\u0647\u064A\u0629 \u0644\u062C\u0645\u064A\u0639 \u0627\u0644\u062E\u0644\u0627\u0626\u0642\u060C \u0641\u0644\u0627 \u0645\u0639\u0628\u0648\u062F \u0628\u062D\u0642\u064D\u0651 \u0625\u0644\u0627\u064E\u0651 \u0647\u0648 - \u0633\u0628\u062D\u0627\u0646\u0647 - \u0648\u0647\u0648 \u0627\u0644\u0645\u0633\u062A\u064E\u062D\u0642 \u0644\u0644\u0639\u0650\u0628\u0627\u062F\u0629\u060C \u0648\u0628\u0647\u0630\u0647 \u0627\u0644\u0643\u0644\u0645\u0629 \u0623\u0631\u0652\u0633\u064E\u0644 \u0627\u0644\u0644\u0647 \u0627\u0644\u0631\u064F\u0651\u0633\u0644\u060C \u0648\u0623\u0646\u0632\u064E\u0644\n    </div>\n    <div id=\"alkotob-copyright\">\n      <a target=\"_blank\" href=\"https://alkotob.org/?utm_source=reftagger\">alkotob.org</a>\n    </div>\n    <div id=\"alkotob-readmore\">\n      <a id=\"alkotob-readmore-link\" target=\"_blank\" href=\"https://alkotob.org/?utm_source=reftagger\">&laquo; \u0627\u0642\u0631\u0623 \u0623\u0643\u062B\u0631</a>\n    </div>\n  </div>\n";
 
 	exports.default = template;
 
