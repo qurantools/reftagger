@@ -91,9 +91,10 @@ class Reftagger {
 
       // Parse out all the references
       references.push(...Quran.parse(node.textContent));
+      references.push(...Bible.parse(node.textContent));
 
       references
-        .reverse() // Reverse the DOM manipulation cause it splits nodes
+        .sort((a, b) => b.order - a.order) // Sort in reverse order
         .forEach(ref => this._wrapReference(node, ref));
     });
 

@@ -1,5 +1,9 @@
 class Reference {
   constructor() {
+    // Set the index here to allow it to order in reverse.
+    // When it breaks up the DOM indexes are reset unless reversed.
+    this.order = 0;
+
     this._opts = {
       text: null,
       type: null,

@@ -52,6 +52,7 @@ function parse(input) {
   while (match = regex.exec(input)) {
     let ref = new Reference();
 
+    ref.order = match.index;
     ref.text = match[0];
     ref.type = 'bible';
     ref.book = getBook(match[1]);

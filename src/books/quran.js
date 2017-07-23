@@ -169,6 +169,7 @@ function parse(input) {
   while (match = regex.exec(input)) {
     let ref = new Reference();
 
+    ref.order = match.index;
     ref.text = match[0];
     ref.type = 'quran';
     ref.chapter = getChapter(match[1]);
@@ -199,6 +200,7 @@ function parse(input) {
   while (match = regex.exec(input)) {
     let ref = new Reference();
 
+    ref.order = match.index;
     ref.text = match[0];
     ref.type = 'quran';
     ref.chapter = getChapter(match[2] || match[1]);

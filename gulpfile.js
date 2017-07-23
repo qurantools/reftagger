@@ -11,6 +11,15 @@ const Instrumenter = isparta.Instrumenter;
 const mochaGlobals = require('./test/setup/.globals');
 const manifest = require('./package.json');
 
+const banner = `/*!
+ * ${manifest.name} ${manifest.version}
+ * ${manifest.description}
+ * ${manifest.homepage}
+ *
+ * Copyright © 2017, ${manifest.author}
+ * Released under the ${manifest.license}
+ */\n\n`;
+
 // Load all of our Gulp plugins
 const $ = loadPlugins();
 
@@ -49,6 +58,8 @@ function lintGulpfile() {
 }
 
 function build() {
+  styles();
+
   return gulp.src(path.join('src', config.entryFileName))
     .pipe(webpackStream({
       output: {
@@ -66,16 +77,25 @@ function build() {
         loaders: [
           { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }
         ]
-      },
-      devtool: 'source-map'
+      }
     }))
+    .pipe($.banner(banner))
     .pipe(gulp.dest(destinationFolder))
     .pipe($.filter(['**', '!**/*.js.map']))
     .pipe($.rename(`${exportFileName}.min.js`))
     .pipe($.sourcemaps.init({ loadMaps: true }))
     .pipe($.uglify())
+    .pipe($.banner(banner))
     .pipe($.sourcemaps.write('./'))
     .pipe(gulp.dest(destinationFolder));
+}
+
+function styles() {
+  return gulp.src(path.join('src', 'styles', 'styles.scss'))
+    .pipe($.sass({ outputStyle: 'compressed' }).on('error', $.sass.logError))
+    .pipe($.rename('styles.min.css'))
+    .pipe($.banner(banner))
+    .pipe(gulp.dest(destinationFolder))
 }
 
 function _mocha() {
