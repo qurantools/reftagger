@@ -270,9 +270,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      // Insert it before the tailing statement
 	      startNode.parentNode.insertBefore(refEl, startNode);
-	
-	      // Replace each match with proper html
-	      // console.log(startNode);
 	    }
 	
 	    /**
@@ -4475,7 +4472,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'chapter',
 	    set: function set(num) {
-	      this._opts.chapter = num.toString();
+	      this._opts.chapter = num.trim().toString();
 	    },
 	    get: function get() {
 	      return this._opts.chapter;
@@ -4511,16 +4508,110 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var Bible = {};
+	exports.parse = exports.getBook = undefined;
 	
-	exports.default = Bible;
+	var _escapeStringRegexp = __webpack_require__(3);
+	
+	var _escapeStringRegexp2 = _interopRequireDefault(_escapeStringRegexp);
+	
+	var _reference = __webpack_require__(4);
+	
+	var _reference2 = _interopRequireDefault(_reference);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var books = {
+	  psa: ['Ps', 'Psalms', 'Psalm']
+	};
+	
+	// Make the array lowercase so its not case-sensitive
+	Object.keys(books).forEach(function (bookId) {
+	  books[bookId] = books[bookId].map(function (book) {
+	    return book.toLowerCase();
+	  });
+	});
+	
+	function getBook(title) {
+	  title = title.toLowerCase();
+	
+	  // If they used an actual normalized version, return it
+	  if (typeof books[title] !== 'undefined') return title;
+	
+	  // Look through titles for proper format
+	  var _iteratorNormalCompletion = true;
+	  var _didIteratorError = false;
+	  var _iteratorError = undefined;
+	
+	  try {
+	    for (var _iterator = Object.keys(books)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	      var bookId = _step.value;
+	
+	      if (books[bookId].indexOf(title) !== -1) {
+	        return bookId;
+	      }
+	    }
+	  } catch (err) {
+	    _didIteratorError = true;
+	    _iteratorError = err;
+	  } finally {
+	    try {
+	      if (!_iteratorNormalCompletion && _iterator.return) {
+	        _iterator.return();
+	      }
+	    } finally {
+	      if (_didIteratorError) {
+	        throw _iteratorError;
+	      }
+	    }
+	  }
+	
+	  return false;
+	}
+	
+	function parse(input) {
+	  var results = [];
+	  var pattern = void 0;
+	  var regex = void 0;
+	  var match = void 0;
+	
+	  /**
+	   * <en|ar book> 10: 12-13,4
+	   * <en|ar book> 139: 12-13,4
+	   */
+	  var bookList = books.map(function (variations) {
+	    return variations.map(function (bookName) {
+	      return (0, _escapeStringRegexp2.default)(bookName);
+	    }).join('|');
+	  }).join('|');
+	
+	  pattern = '\n    (' + bookList + ')\n    \\s*\n      ([\\d]{1,3})\\s*:?\n      \\s*\n      ([\\d\\s\\-,]+)?\n    ';
+	
+	  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
+	  while (match = regex.exec(input)) {
+	    var ref = new _reference2.default();
+	
+	    ref.text = match[0];
+	    ref.type = 'bible';
+	    ref.book = getBook(match[1]);
+	    ref.chapter = match[2];
+	    ref.verses = match[3];
+	
+	    results.push(ref);
+	  }
+	
+	  return results;
+	};
+	
+	exports.default = { parse: parse, getBook: getBook };
+	exports.getBook = getBook;
+	exports.parse = parse;
 
 /***/ },
 /* 6 */

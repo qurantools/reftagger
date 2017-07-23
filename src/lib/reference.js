@@ -22,7 +22,7 @@ class Reference {
   }
 
   set chapter(num) {
-    this._opts.chapter = num.toString();
+    this._opts.chapter = num.toString().trim();
   }
 
   set book(name) {
