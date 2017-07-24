@@ -1,8 +1,11 @@
 import Tippy from 'tippy.js';
+import GraphQLFetch from 'graphql-fetch';
 import Quran from './books/quran';
 import Bible from './books/bible';
 import tooltipHTML from './templates/tooltip';
 import DOMIterator from './lib/dom-iterator';
+
+const fetch = GraphQLFetch('https://api.alkotob.org/query');
 
 /**
  * The main entry point for the reftagger of Alkotob
@@ -237,6 +240,8 @@ class Reftagger {
         self._tippy.update(this);
 
         // TODO: load the api request
+        // Implement: https://github.com/tjmehta/graphql-fetch?files=1
+
         // fetch('https://unsplash.it/200/?random')
         //   .then(resp => resp.blob())
         //   .then(blob => {

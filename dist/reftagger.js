@@ -75,19 +75,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _tippy2 = _interopRequireDefault(_tippy);
 
-	var _quran = __webpack_require__(2);
+	var _graphqlFetch = __webpack_require__(2);
+
+	var _graphqlFetch2 = _interopRequireDefault(_graphqlFetch);
+
+	var _quran = __webpack_require__(14);
 
 	var _quran2 = _interopRequireDefault(_quran);
 
-	var _bible = __webpack_require__(5);
+	var _bible = __webpack_require__(17);
 
 	var _bible2 = _interopRequireDefault(_bible);
 
-	var _tooltip = __webpack_require__(6);
+	var _tooltip = __webpack_require__(18);
 
 	var _tooltip2 = _interopRequireDefault(_tooltip);
 
-	var _domIterator = __webpack_require__(7);
+	var _domIterator = __webpack_require__(19);
 
 	var _domIterator2 = _interopRequireDefault(_domIterator);
 
@@ -97,9 +101,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	var fetch = (0, _graphqlFetch2.default)('https://api.alkotob.org/query');
+
 	/**
 	 * The main entry point for the reftagger of Alkotob
 	 */
+
 	var Reftagger = function () {
 	  function Reftagger(ctx) {
 	    _classCallCheck(this, Reftagger);
@@ -351,6 +358,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          self._tippy.update(this);
 
 	          // TODO: load the api request
+	          // Implement: https://github.com/tjmehta/graphql-fetch?files=1
+
 	          // fetch('https://unsplash.it/200/?random')
 	          //   .then(resp => resp.blob())
 	          //   .then(blob => {
@@ -4324,6 +4333,1974 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict'
+	__webpack_require__(3) // injects globals: fetch, Headers, Request, Response
+
+	var assert = __webpack_require__(5)
+	var defaults = __webpack_require__(10)
+
+	/**
+	 * create a graphql-fetch bound to a specific graphql url
+	 * @param  {String} graphqlUrl
+	 * @return {Function} graphqlFetch
+	 */
+	module.exports = function factory (graphqlUrl) {
+	  /**
+	   * graphql fetch - fetch w/ smart defaults for graphql requests
+	   * @param  {Query} query graphql query
+	   * @param  {Object} vars  graphql query args
+	   * @param  {Object} opts  fetch options
+	   * @return {FetchPromise} fetch promise
+	   */
+	  return function graphqlFetch (query, vars, opts) {
+	    assert(query, 'query is required')
+	    vars = vars || {}
+	    opts = opts || {}
+	    opts.body = JSON.stringify({
+	      query: query,
+	      variables: vars
+	    })
+	    // default opts
+	    defaults(opts, {
+	      method: 'POST',
+	      headers: new Headers()
+	    })
+	    // default headers
+	    var headers = opts.headers
+	    if (!headers.get('content-type')) {
+	      opts.headers.append('content-type', 'application/json')
+	    }
+	    return fetch(graphqlUrl, opts).then(function (res) {
+	      return res.json()
+	    })
+	  }
+	}
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// the whatwg-fetch polyfill installs the fetch() function
+	// on the global object (window or self)
+	//
+	// Return that as the export for use in Webpack, Browserify etc.
+	__webpack_require__(4);
+	module.exports = self.fetch.bind(self);
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	(function(self) {
+	  'use strict';
+
+	  if (self.fetch) {
+	    return
+	  }
+
+	  var support = {
+	    searchParams: 'URLSearchParams' in self,
+	    iterable: 'Symbol' in self && 'iterator' in Symbol,
+	    blob: 'FileReader' in self && 'Blob' in self && (function() {
+	      try {
+	        new Blob()
+	        return true
+	      } catch(e) {
+	        return false
+	      }
+	    })(),
+	    formData: 'FormData' in self,
+	    arrayBuffer: 'ArrayBuffer' in self
+	  }
+
+	  if (support.arrayBuffer) {
+	    var viewClasses = [
+	      '[object Int8Array]',
+	      '[object Uint8Array]',
+	      '[object Uint8ClampedArray]',
+	      '[object Int16Array]',
+	      '[object Uint16Array]',
+	      '[object Int32Array]',
+	      '[object Uint32Array]',
+	      '[object Float32Array]',
+	      '[object Float64Array]'
+	    ]
+
+	    var isDataView = function(obj) {
+	      return obj && DataView.prototype.isPrototypeOf(obj)
+	    }
+
+	    var isArrayBufferView = ArrayBuffer.isView || function(obj) {
+	      return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
+	    }
+	  }
+
+	  function normalizeName(name) {
+	    if (typeof name !== 'string') {
+	      name = String(name)
+	    }
+	    if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
+	      throw new TypeError('Invalid character in header field name')
+	    }
+	    return name.toLowerCase()
+	  }
+
+	  function normalizeValue(value) {
+	    if (typeof value !== 'string') {
+	      value = String(value)
+	    }
+	    return value
+	  }
+
+	  // Build a destructive iterator for the value list
+	  function iteratorFor(items) {
+	    var iterator = {
+	      next: function() {
+	        var value = items.shift()
+	        return {done: value === undefined, value: value}
+	      }
+	    }
+
+	    if (support.iterable) {
+	      iterator[Symbol.iterator] = function() {
+	        return iterator
+	      }
+	    }
+
+	    return iterator
+	  }
+
+	  function Headers(headers) {
+	    this.map = {}
+
+	    if (headers instanceof Headers) {
+	      headers.forEach(function(value, name) {
+	        this.append(name, value)
+	      }, this)
+	    } else if (Array.isArray(headers)) {
+	      headers.forEach(function(header) {
+	        this.append(header[0], header[1])
+	      }, this)
+	    } else if (headers) {
+	      Object.getOwnPropertyNames(headers).forEach(function(name) {
+	        this.append(name, headers[name])
+	      }, this)
+	    }
+	  }
+
+	  Headers.prototype.append = function(name, value) {
+	    name = normalizeName(name)
+	    value = normalizeValue(value)
+	    var oldValue = this.map[name]
+	    this.map[name] = oldValue ? oldValue+','+value : value
+	  }
+
+	  Headers.prototype['delete'] = function(name) {
+	    delete this.map[normalizeName(name)]
+	  }
+
+	  Headers.prototype.get = function(name) {
+	    name = normalizeName(name)
+	    return this.has(name) ? this.map[name] : null
+	  }
+
+	  Headers.prototype.has = function(name) {
+	    return this.map.hasOwnProperty(normalizeName(name))
+	  }
+
+	  Headers.prototype.set = function(name, value) {
+	    this.map[normalizeName(name)] = normalizeValue(value)
+	  }
+
+	  Headers.prototype.forEach = function(callback, thisArg) {
+	    for (var name in this.map) {
+	      if (this.map.hasOwnProperty(name)) {
+	        callback.call(thisArg, this.map[name], name, this)
+	      }
+	    }
+	  }
+
+	  Headers.prototype.keys = function() {
+	    var items = []
+	    this.forEach(function(value, name) { items.push(name) })
+	    return iteratorFor(items)
+	  }
+
+	  Headers.prototype.values = function() {
+	    var items = []
+	    this.forEach(function(value) { items.push(value) })
+	    return iteratorFor(items)
+	  }
+
+	  Headers.prototype.entries = function() {
+	    var items = []
+	    this.forEach(function(value, name) { items.push([name, value]) })
+	    return iteratorFor(items)
+	  }
+
+	  if (support.iterable) {
+	    Headers.prototype[Symbol.iterator] = Headers.prototype.entries
+	  }
+
+	  function consumed(body) {
+	    if (body.bodyUsed) {
+	      return Promise.reject(new TypeError('Already read'))
+	    }
+	    body.bodyUsed = true
+	  }
+
+	  function fileReaderReady(reader) {
+	    return new Promise(function(resolve, reject) {
+	      reader.onload = function() {
+	        resolve(reader.result)
+	      }
+	      reader.onerror = function() {
+	        reject(reader.error)
+	      }
+	    })
+	  }
+
+	  function readBlobAsArrayBuffer(blob) {
+	    var reader = new FileReader()
+	    var promise = fileReaderReady(reader)
+	    reader.readAsArrayBuffer(blob)
+	    return promise
+	  }
+
+	  function readBlobAsText(blob) {
+	    var reader = new FileReader()
+	    var promise = fileReaderReady(reader)
+	    reader.readAsText(blob)
+	    return promise
+	  }
+
+	  function readArrayBufferAsText(buf) {
+	    var view = new Uint8Array(buf)
+	    var chars = new Array(view.length)
+
+	    for (var i = 0; i < view.length; i++) {
+	      chars[i] = String.fromCharCode(view[i])
+	    }
+	    return chars.join('')
+	  }
+
+	  function bufferClone(buf) {
+	    if (buf.slice) {
+	      return buf.slice(0)
+	    } else {
+	      var view = new Uint8Array(buf.byteLength)
+	      view.set(new Uint8Array(buf))
+	      return view.buffer
+	    }
+	  }
+
+	  function Body() {
+	    this.bodyUsed = false
+
+	    this._initBody = function(body) {
+	      this._bodyInit = body
+	      if (!body) {
+	        this._bodyText = ''
+	      } else if (typeof body === 'string') {
+	        this._bodyText = body
+	      } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+	        this._bodyBlob = body
+	      } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+	        this._bodyFormData = body
+	      } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+	        this._bodyText = body.toString()
+	      } else if (support.arrayBuffer && support.blob && isDataView(body)) {
+	        this._bodyArrayBuffer = bufferClone(body.buffer)
+	        // IE 10-11 can't handle a DataView body.
+	        this._bodyInit = new Blob([this._bodyArrayBuffer])
+	      } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
+	        this._bodyArrayBuffer = bufferClone(body)
+	      } else {
+	        throw new Error('unsupported BodyInit type')
+	      }
+
+	      if (!this.headers.get('content-type')) {
+	        if (typeof body === 'string') {
+	          this.headers.set('content-type', 'text/plain;charset=UTF-8')
+	        } else if (this._bodyBlob && this._bodyBlob.type) {
+	          this.headers.set('content-type', this._bodyBlob.type)
+	        } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+	          this.headers.set('content-type', 'application/x-www-form-urlencoded;charset=UTF-8')
+	        }
+	      }
+	    }
+
+	    if (support.blob) {
+	      this.blob = function() {
+	        var rejected = consumed(this)
+	        if (rejected) {
+	          return rejected
+	        }
+
+	        if (this._bodyBlob) {
+	          return Promise.resolve(this._bodyBlob)
+	        } else if (this._bodyArrayBuffer) {
+	          return Promise.resolve(new Blob([this._bodyArrayBuffer]))
+	        } else if (this._bodyFormData) {
+	          throw new Error('could not read FormData body as blob')
+	        } else {
+	          return Promise.resolve(new Blob([this._bodyText]))
+	        }
+	      }
+
+	      this.arrayBuffer = function() {
+	        if (this._bodyArrayBuffer) {
+	          return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
+	        } else {
+	          return this.blob().then(readBlobAsArrayBuffer)
+	        }
+	      }
+	    }
+
+	    this.text = function() {
+	      var rejected = consumed(this)
+	      if (rejected) {
+	        return rejected
+	      }
+
+	      if (this._bodyBlob) {
+	        return readBlobAsText(this._bodyBlob)
+	      } else if (this._bodyArrayBuffer) {
+	        return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
+	      } else if (this._bodyFormData) {
+	        throw new Error('could not read FormData body as text')
+	      } else {
+	        return Promise.resolve(this._bodyText)
+	      }
+	    }
+
+	    if (support.formData) {
+	      this.formData = function() {
+	        return this.text().then(decode)
+	      }
+	    }
+
+	    this.json = function() {
+	      return this.text().then(JSON.parse)
+	    }
+
+	    return this
+	  }
+
+	  // HTTP methods whose capitalization should be normalized
+	  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT']
+
+	  function normalizeMethod(method) {
+	    var upcased = method.toUpperCase()
+	    return (methods.indexOf(upcased) > -1) ? upcased : method
+	  }
+
+	  function Request(input, options) {
+	    options = options || {}
+	    var body = options.body
+
+	    if (input instanceof Request) {
+	      if (input.bodyUsed) {
+	        throw new TypeError('Already read')
+	      }
+	      this.url = input.url
+	      this.credentials = input.credentials
+	      if (!options.headers) {
+	        this.headers = new Headers(input.headers)
+	      }
+	      this.method = input.method
+	      this.mode = input.mode
+	      if (!body && input._bodyInit != null) {
+	        body = input._bodyInit
+	        input.bodyUsed = true
+	      }
+	    } else {
+	      this.url = String(input)
+	    }
+
+	    this.credentials = options.credentials || this.credentials || 'omit'
+	    if (options.headers || !this.headers) {
+	      this.headers = new Headers(options.headers)
+	    }
+	    this.method = normalizeMethod(options.method || this.method || 'GET')
+	    this.mode = options.mode || this.mode || null
+	    this.referrer = null
+
+	    if ((this.method === 'GET' || this.method === 'HEAD') && body) {
+	      throw new TypeError('Body not allowed for GET or HEAD requests')
+	    }
+	    this._initBody(body)
+	  }
+
+	  Request.prototype.clone = function() {
+	    return new Request(this, { body: this._bodyInit })
+	  }
+
+	  function decode(body) {
+	    var form = new FormData()
+	    body.trim().split('&').forEach(function(bytes) {
+	      if (bytes) {
+	        var split = bytes.split('=')
+	        var name = split.shift().replace(/\+/g, ' ')
+	        var value = split.join('=').replace(/\+/g, ' ')
+	        form.append(decodeURIComponent(name), decodeURIComponent(value))
+	      }
+	    })
+	    return form
+	  }
+
+	  function parseHeaders(rawHeaders) {
+	    var headers = new Headers()
+	    rawHeaders.split(/\r?\n/).forEach(function(line) {
+	      var parts = line.split(':')
+	      var key = parts.shift().trim()
+	      if (key) {
+	        var value = parts.join(':').trim()
+	        headers.append(key, value)
+	      }
+	    })
+	    return headers
+	  }
+
+	  Body.call(Request.prototype)
+
+	  function Response(bodyInit, options) {
+	    if (!options) {
+	      options = {}
+	    }
+
+	    this.type = 'default'
+	    this.status = 'status' in options ? options.status : 200
+	    this.ok = this.status >= 200 && this.status < 300
+	    this.statusText = 'statusText' in options ? options.statusText : 'OK'
+	    this.headers = new Headers(options.headers)
+	    this.url = options.url || ''
+	    this._initBody(bodyInit)
+	  }
+
+	  Body.call(Response.prototype)
+
+	  Response.prototype.clone = function() {
+	    return new Response(this._bodyInit, {
+	      status: this.status,
+	      statusText: this.statusText,
+	      headers: new Headers(this.headers),
+	      url: this.url
+	    })
+	  }
+
+	  Response.error = function() {
+	    var response = new Response(null, {status: 0, statusText: ''})
+	    response.type = 'error'
+	    return response
+	  }
+
+	  var redirectStatuses = [301, 302, 303, 307, 308]
+
+	  Response.redirect = function(url, status) {
+	    if (redirectStatuses.indexOf(status) === -1) {
+	      throw new RangeError('Invalid status code')
+	    }
+
+	    return new Response(null, {status: status, headers: {location: url}})
+	  }
+
+	  self.Headers = Headers
+	  self.Request = Request
+	  self.Response = Response
+
+	  self.fetch = function(input, init) {
+	    return new Promise(function(resolve, reject) {
+	      var request = new Request(input, init)
+	      var xhr = new XMLHttpRequest()
+
+	      xhr.onload = function() {
+	        var options = {
+	          status: xhr.status,
+	          statusText: xhr.statusText,
+	          headers: parseHeaders(xhr.getAllResponseHeaders() || '')
+	        }
+	        options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
+	        var body = 'response' in xhr ? xhr.response : xhr.responseText
+	        resolve(new Response(body, options))
+	      }
+
+	      xhr.onerror = function() {
+	        reject(new TypeError('Network request failed'))
+	      }
+
+	      xhr.ontimeout = function() {
+	        reject(new TypeError('Network request failed'))
+	      }
+
+	      xhr.open(request.method, request.url, true)
+
+	      if (request.credentials === 'include') {
+	        xhr.withCredentials = true
+	      }
+
+	      if ('responseType' in xhr && support.blob) {
+	        xhr.responseType = 'blob'
+	      }
+
+	      request.headers.forEach(function(value, name) {
+	        xhr.setRequestHeader(name, value)
+	      })
+
+	      xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit)
+	    })
+	  }
+	  self.fetch.polyfill = true
+	})(typeof self !== 'undefined' ? self : this);
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	// compare and isBuffer taken from https://github.com/feross/buffer/blob/680e9e5e488f22aac27599a57dc844a6315928dd/index.js
+	// original notice:
+
+	/*!
+	 * The buffer module from node.js, for the browser.
+	 *
+	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+	 * @license  MIT
+	 */
+	function compare(a, b) {
+	  if (a === b) {
+	    return 0;
+	  }
+
+	  var x = a.length;
+	  var y = b.length;
+
+	  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
+	    if (a[i] !== b[i]) {
+	      x = a[i];
+	      y = b[i];
+	      break;
+	    }
+	  }
+
+	  if (x < y) {
+	    return -1;
+	  }
+	  if (y < x) {
+	    return 1;
+	  }
+	  return 0;
+	}
+	function isBuffer(b) {
+	  if (global.Buffer && typeof global.Buffer.isBuffer === 'function') {
+	    return global.Buffer.isBuffer(b);
+	  }
+	  return !!(b != null && b._isBuffer);
+	}
+
+	// based on node assert, original notice:
+
+	// http://wiki.commonjs.org/wiki/Unit_Testing/1.0
+	//
+	// THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
+	//
+	// Originally from narwhal.js (http://narwhaljs.org)
+	// Copyright (c) 2009 Thomas Robinson <280north.com>
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a copy
+	// of this software and associated documentation files (the 'Software'), to
+	// deal in the Software without restriction, including without limitation the
+	// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+	// sell copies of the Software, and to permit persons to whom the Software is
+	// furnished to do so, subject to the following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included in
+	// all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	// AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+	// ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+	// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	var util = __webpack_require__(6);
+	var hasOwn = Object.prototype.hasOwnProperty;
+	var pSlice = Array.prototype.slice;
+	var functionsHaveNames = (function () {
+	  return function foo() {}.name === 'foo';
+	}());
+	function pToString (obj) {
+	  return Object.prototype.toString.call(obj);
+	}
+	function isView(arrbuf) {
+	  if (isBuffer(arrbuf)) {
+	    return false;
+	  }
+	  if (typeof global.ArrayBuffer !== 'function') {
+	    return false;
+	  }
+	  if (typeof ArrayBuffer.isView === 'function') {
+	    return ArrayBuffer.isView(arrbuf);
+	  }
+	  if (!arrbuf) {
+	    return false;
+	  }
+	  if (arrbuf instanceof DataView) {
+	    return true;
+	  }
+	  if (arrbuf.buffer && arrbuf.buffer instanceof ArrayBuffer) {
+	    return true;
+	  }
+	  return false;
+	}
+	// 1. The assert module provides functions that throw
+	// AssertionError's when particular conditions are not met. The
+	// assert module must conform to the following interface.
+
+	var assert = module.exports = ok;
+
+	// 2. The AssertionError is defined in assert.
+	// new assert.AssertionError({ message: message,
+	//                             actual: actual,
+	//                             expected: expected })
+
+	var regex = /\s*function\s+([^\(\s]*)\s*/;
+	// based on https://github.com/ljharb/function.prototype.name/blob/adeeeec8bfcc6068b187d7d9fb3d5bb1d3a30899/implementation.js
+	function getName(func) {
+	  if (!util.isFunction(func)) {
+	    return;
+	  }
+	  if (functionsHaveNames) {
+	    return func.name;
+	  }
+	  var str = func.toString();
+	  var match = str.match(regex);
+	  return match && match[1];
+	}
+	assert.AssertionError = function AssertionError(options) {
+	  this.name = 'AssertionError';
+	  this.actual = options.actual;
+	  this.expected = options.expected;
+	  this.operator = options.operator;
+	  if (options.message) {
+	    this.message = options.message;
+	    this.generatedMessage = false;
+	  } else {
+	    this.message = getMessage(this);
+	    this.generatedMessage = true;
+	  }
+	  var stackStartFunction = options.stackStartFunction || fail;
+	  if (Error.captureStackTrace) {
+	    Error.captureStackTrace(this, stackStartFunction);
+	  } else {
+	    // non v8 browsers so we can have a stacktrace
+	    var err = new Error();
+	    if (err.stack) {
+	      var out = err.stack;
+
+	      // try to strip useless frames
+	      var fn_name = getName(stackStartFunction);
+	      var idx = out.indexOf('\n' + fn_name);
+	      if (idx >= 0) {
+	        // once we have located the function frame
+	        // we need to strip out everything before it (and its line)
+	        var next_line = out.indexOf('\n', idx + 1);
+	        out = out.substring(next_line + 1);
+	      }
+
+	      this.stack = out;
+	    }
+	  }
+	};
+
+	// assert.AssertionError instanceof Error
+	util.inherits(assert.AssertionError, Error);
+
+	function truncate(s, n) {
+	  if (typeof s === 'string') {
+	    return s.length < n ? s : s.slice(0, n);
+	  } else {
+	    return s;
+	  }
+	}
+	function inspect(something) {
+	  if (functionsHaveNames || !util.isFunction(something)) {
+	    return util.inspect(something);
+	  }
+	  var rawname = getName(something);
+	  var name = rawname ? ': ' + rawname : '';
+	  return '[Function' +  name + ']';
+	}
+	function getMessage(self) {
+	  return truncate(inspect(self.actual), 128) + ' ' +
+	         self.operator + ' ' +
+	         truncate(inspect(self.expected), 128);
+	}
+
+	// At present only the three keys mentioned above are used and
+	// understood by the spec. Implementations or sub modules can pass
+	// other keys to the AssertionError's constructor - they will be
+	// ignored.
+
+	// 3. All of the following functions must throw an AssertionError
+	// when a corresponding condition is not met, with a message that
+	// may be undefined if not provided.  All assertion methods provide
+	// both the actual and expected values to the assertion error for
+	// display purposes.
+
+	function fail(actual, expected, message, operator, stackStartFunction) {
+	  throw new assert.AssertionError({
+	    message: message,
+	    actual: actual,
+	    expected: expected,
+	    operator: operator,
+	    stackStartFunction: stackStartFunction
+	  });
+	}
+
+	// EXTENSION! allows for well behaved errors defined elsewhere.
+	assert.fail = fail;
+
+	// 4. Pure assertion tests whether a value is truthy, as determined
+	// by !!guard.
+	// assert.ok(guard, message_opt);
+	// This statement is equivalent to assert.equal(true, !!guard,
+	// message_opt);. To test strictly for the value true, use
+	// assert.strictEqual(true, guard, message_opt);.
+
+	function ok(value, message) {
+	  if (!value) fail(value, true, message, '==', assert.ok);
+	}
+	assert.ok = ok;
+
+	// 5. The equality assertion tests shallow, coercive equality with
+	// ==.
+	// assert.equal(actual, expected, message_opt);
+
+	assert.equal = function equal(actual, expected, message) {
+	  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
+	};
+
+	// 6. The non-equality assertion tests for whether two objects are not equal
+	// with != assert.notEqual(actual, expected, message_opt);
+
+	assert.notEqual = function notEqual(actual, expected, message) {
+	  if (actual == expected) {
+	    fail(actual, expected, message, '!=', assert.notEqual);
+	  }
+	};
+
+	// 7. The equivalence assertion tests a deep equality relation.
+	// assert.deepEqual(actual, expected, message_opt);
+
+	assert.deepEqual = function deepEqual(actual, expected, message) {
+	  if (!_deepEqual(actual, expected, false)) {
+	    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
+	  }
+	};
+
+	assert.deepStrictEqual = function deepStrictEqual(actual, expected, message) {
+	  if (!_deepEqual(actual, expected, true)) {
+	    fail(actual, expected, message, 'deepStrictEqual', assert.deepStrictEqual);
+	  }
+	};
+
+	function _deepEqual(actual, expected, strict, memos) {
+	  // 7.1. All identical values are equivalent, as determined by ===.
+	  if (actual === expected) {
+	    return true;
+	  } else if (isBuffer(actual) && isBuffer(expected)) {
+	    return compare(actual, expected) === 0;
+
+	  // 7.2. If the expected value is a Date object, the actual value is
+	  // equivalent if it is also a Date object that refers to the same time.
+	  } else if (util.isDate(actual) && util.isDate(expected)) {
+	    return actual.getTime() === expected.getTime();
+
+	  // 7.3 If the expected value is a RegExp object, the actual value is
+	  // equivalent if it is also a RegExp object with the same source and
+	  // properties (`global`, `multiline`, `lastIndex`, `ignoreCase`).
+	  } else if (util.isRegExp(actual) && util.isRegExp(expected)) {
+	    return actual.source === expected.source &&
+	           actual.global === expected.global &&
+	           actual.multiline === expected.multiline &&
+	           actual.lastIndex === expected.lastIndex &&
+	           actual.ignoreCase === expected.ignoreCase;
+
+	  // 7.4. Other pairs that do not both pass typeof value == 'object',
+	  // equivalence is determined by ==.
+	  } else if ((actual === null || typeof actual !== 'object') &&
+	             (expected === null || typeof expected !== 'object')) {
+	    return strict ? actual === expected : actual == expected;
+
+	  // If both values are instances of typed arrays, wrap their underlying
+	  // ArrayBuffers in a Buffer each to increase performance
+	  // This optimization requires the arrays to have the same type as checked by
+	  // Object.prototype.toString (aka pToString). Never perform binary
+	  // comparisons for Float*Arrays, though, since e.g. +0 === -0 but their
+	  // bit patterns are not identical.
+	  } else if (isView(actual) && isView(expected) &&
+	             pToString(actual) === pToString(expected) &&
+	             !(actual instanceof Float32Array ||
+	               actual instanceof Float64Array)) {
+	    return compare(new Uint8Array(actual.buffer),
+	                   new Uint8Array(expected.buffer)) === 0;
+
+	  // 7.5 For all other Object pairs, including Array objects, equivalence is
+	  // determined by having the same number of owned properties (as verified
+	  // with Object.prototype.hasOwnProperty.call), the same set of keys
+	  // (although not necessarily the same order), equivalent values for every
+	  // corresponding key, and an identical 'prototype' property. Note: this
+	  // accounts for both named and indexed properties on Arrays.
+	  } else if (isBuffer(actual) !== isBuffer(expected)) {
+	    return false;
+	  } else {
+	    memos = memos || {actual: [], expected: []};
+
+	    var actualIndex = memos.actual.indexOf(actual);
+	    if (actualIndex !== -1) {
+	      if (actualIndex === memos.expected.indexOf(expected)) {
+	        return true;
+	      }
+	    }
+
+	    memos.actual.push(actual);
+	    memos.expected.push(expected);
+
+	    return objEquiv(actual, expected, strict, memos);
+	  }
+	}
+
+	function isArguments(object) {
+	  return Object.prototype.toString.call(object) == '[object Arguments]';
+	}
+
+	function objEquiv(a, b, strict, actualVisitedObjects) {
+	  if (a === null || a === undefined || b === null || b === undefined)
+	    return false;
+	  // if one is a primitive, the other must be same
+	  if (util.isPrimitive(a) || util.isPrimitive(b))
+	    return a === b;
+	  if (strict && Object.getPrototypeOf(a) !== Object.getPrototypeOf(b))
+	    return false;
+	  var aIsArgs = isArguments(a);
+	  var bIsArgs = isArguments(b);
+	  if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs))
+	    return false;
+	  if (aIsArgs) {
+	    a = pSlice.call(a);
+	    b = pSlice.call(b);
+	    return _deepEqual(a, b, strict);
+	  }
+	  var ka = objectKeys(a);
+	  var kb = objectKeys(b);
+	  var key, i;
+	  // having the same number of owned properties (keys incorporates
+	  // hasOwnProperty)
+	  if (ka.length !== kb.length)
+	    return false;
+	  //the same set of keys (although not necessarily the same order),
+	  ka.sort();
+	  kb.sort();
+	  //~~~cheap key test
+	  for (i = ka.length - 1; i >= 0; i--) {
+	    if (ka[i] !== kb[i])
+	      return false;
+	  }
+	  //equivalent values for every corresponding key, and
+	  //~~~possibly expensive deep test
+	  for (i = ka.length - 1; i >= 0; i--) {
+	    key = ka[i];
+	    if (!_deepEqual(a[key], b[key], strict, actualVisitedObjects))
+	      return false;
+	  }
+	  return true;
+	}
+
+	// 8. The non-equivalence assertion tests for any deep inequality.
+	// assert.notDeepEqual(actual, expected, message_opt);
+
+	assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
+	  if (_deepEqual(actual, expected, false)) {
+	    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
+	  }
+	};
+
+	assert.notDeepStrictEqual = notDeepStrictEqual;
+	function notDeepStrictEqual(actual, expected, message) {
+	  if (_deepEqual(actual, expected, true)) {
+	    fail(actual, expected, message, 'notDeepStrictEqual', notDeepStrictEqual);
+	  }
+	}
+
+
+	// 9. The strict equality assertion tests strict equality, as determined by ===.
+	// assert.strictEqual(actual, expected, message_opt);
+
+	assert.strictEqual = function strictEqual(actual, expected, message) {
+	  if (actual !== expected) {
+	    fail(actual, expected, message, '===', assert.strictEqual);
+	  }
+	};
+
+	// 10. The strict non-equality assertion tests for strict inequality, as
+	// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
+
+	assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
+	  if (actual === expected) {
+	    fail(actual, expected, message, '!==', assert.notStrictEqual);
+	  }
+	};
+
+	function expectedException(actual, expected) {
+	  if (!actual || !expected) {
+	    return false;
+	  }
+
+	  if (Object.prototype.toString.call(expected) == '[object RegExp]') {
+	    return expected.test(actual);
+	  }
+
+	  try {
+	    if (actual instanceof expected) {
+	      return true;
+	    }
+	  } catch (e) {
+	    // Ignore.  The instanceof check doesn't work for arrow functions.
+	  }
+
+	  if (Error.isPrototypeOf(expected)) {
+	    return false;
+	  }
+
+	  return expected.call({}, actual) === true;
+	}
+
+	function _tryBlock(block) {
+	  var error;
+	  try {
+	    block();
+	  } catch (e) {
+	    error = e;
+	  }
+	  return error;
+	}
+
+	function _throws(shouldThrow, block, expected, message) {
+	  var actual;
+
+	  if (typeof block !== 'function') {
+	    throw new TypeError('"block" argument must be a function');
+	  }
+
+	  if (typeof expected === 'string') {
+	    message = expected;
+	    expected = null;
+	  }
+
+	  actual = _tryBlock(block);
+
+	  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+	            (message ? ' ' + message : '.');
+
+	  if (shouldThrow && !actual) {
+	    fail(actual, expected, 'Missing expected exception' + message);
+	  }
+
+	  var userProvidedMessage = typeof message === 'string';
+	  var isUnwantedException = !shouldThrow && util.isError(actual);
+	  var isUnexpectedException = !shouldThrow && actual && !expected;
+
+	  if ((isUnwantedException &&
+	      userProvidedMessage &&
+	      expectedException(actual, expected)) ||
+	      isUnexpectedException) {
+	    fail(actual, expected, 'Got unwanted exception' + message);
+	  }
+
+	  if ((shouldThrow && actual && expected &&
+	      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+	    throw actual;
+	  }
+	}
+
+	// 11. Expected to throw an error:
+	// assert.throws(block, Error_opt, message_opt);
+
+	assert.throws = function(block, /*optional*/error, /*optional*/message) {
+	  _throws(true, block, error, message);
+	};
+
+	// EXTENSION! This is annoying to write outside this module.
+	assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
+	  _throws(false, block, error, message);
+	};
+
+	assert.ifError = function(err) { if (err) throw err; };
+
+	var objectKeys = Object.keys || function (obj) {
+	  var keys = [];
+	  for (var key in obj) {
+	    if (hasOwn.call(obj, key)) keys.push(key);
+	  }
+	  return keys;
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	var formatRegExp = /%[sdj%]/g;
+	exports.format = function(f) {
+	  if (!isString(f)) {
+	    var objects = [];
+	    for (var i = 0; i < arguments.length; i++) {
+	      objects.push(inspect(arguments[i]));
+	    }
+	    return objects.join(' ');
+	  }
+
+	  var i = 1;
+	  var args = arguments;
+	  var len = args.length;
+	  var str = String(f).replace(formatRegExp, function(x) {
+	    if (x === '%%') return '%';
+	    if (i >= len) return x;
+	    switch (x) {
+	      case '%s': return String(args[i++]);
+	      case '%d': return Number(args[i++]);
+	      case '%j':
+	        try {
+	          return JSON.stringify(args[i++]);
+	        } catch (_) {
+	          return '[Circular]';
+	        }
+	      default:
+	        return x;
+	    }
+	  });
+	  for (var x = args[i]; i < len; x = args[++i]) {
+	    if (isNull(x) || !isObject(x)) {
+	      str += ' ' + x;
+	    } else {
+	      str += ' ' + inspect(x);
+	    }
+	  }
+	  return str;
+	};
+
+
+	// Mark that a method should not be used.
+	// Returns a modified function which warns once by default.
+	// If --no-deprecation is set, then it is a no-op.
+	exports.deprecate = function(fn, msg) {
+	  // Allow for deprecating things in the process of starting up.
+	  if (isUndefined(global.process)) {
+	    return function() {
+	      return exports.deprecate(fn, msg).apply(this, arguments);
+	    };
+	  }
+
+	  if (process.noDeprecation === true) {
+	    return fn;
+	  }
+
+	  var warned = false;
+	  function deprecated() {
+	    if (!warned) {
+	      if (process.throwDeprecation) {
+	        throw new Error(msg);
+	      } else if (process.traceDeprecation) {
+	        console.trace(msg);
+	      } else {
+	        console.error(msg);
+	      }
+	      warned = true;
+	    }
+	    return fn.apply(this, arguments);
+	  }
+
+	  return deprecated;
+	};
+
+
+	var debugs = {};
+	var debugEnviron;
+	exports.debuglog = function(set) {
+	  if (isUndefined(debugEnviron))
+	    debugEnviron = process.env.NODE_DEBUG || '';
+	  set = set.toUpperCase();
+	  if (!debugs[set]) {
+	    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+	      var pid = process.pid;
+	      debugs[set] = function() {
+	        var msg = exports.format.apply(exports, arguments);
+	        console.error('%s %d: %s', set, pid, msg);
+	      };
+	    } else {
+	      debugs[set] = function() {};
+	    }
+	  }
+	  return debugs[set];
+	};
+
+
+	/**
+	 * Echos the value of a value. Trys to print the value out
+	 * in the best way possible given the different types.
+	 *
+	 * @param {Object} obj The object to print out.
+	 * @param {Object} opts Optional options object that alters the output.
+	 */
+	/* legacy: obj, showHidden, depth, colors*/
+	function inspect(obj, opts) {
+	  // default options
+	  var ctx = {
+	    seen: [],
+	    stylize: stylizeNoColor
+	  };
+	  // legacy...
+	  if (arguments.length >= 3) ctx.depth = arguments[2];
+	  if (arguments.length >= 4) ctx.colors = arguments[3];
+	  if (isBoolean(opts)) {
+	    // legacy...
+	    ctx.showHidden = opts;
+	  } else if (opts) {
+	    // got an "options" object
+	    exports._extend(ctx, opts);
+	  }
+	  // set default options
+	  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+	  if (isUndefined(ctx.depth)) ctx.depth = 2;
+	  if (isUndefined(ctx.colors)) ctx.colors = false;
+	  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+	  if (ctx.colors) ctx.stylize = stylizeWithColor;
+	  return formatValue(ctx, obj, ctx.depth);
+	}
+	exports.inspect = inspect;
+
+
+	// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+	inspect.colors = {
+	  'bold' : [1, 22],
+	  'italic' : [3, 23],
+	  'underline' : [4, 24],
+	  'inverse' : [7, 27],
+	  'white' : [37, 39],
+	  'grey' : [90, 39],
+	  'black' : [30, 39],
+	  'blue' : [34, 39],
+	  'cyan' : [36, 39],
+	  'green' : [32, 39],
+	  'magenta' : [35, 39],
+	  'red' : [31, 39],
+	  'yellow' : [33, 39]
+	};
+
+	// Don't use 'blue' not visible on cmd.exe
+	inspect.styles = {
+	  'special': 'cyan',
+	  'number': 'yellow',
+	  'boolean': 'yellow',
+	  'undefined': 'grey',
+	  'null': 'bold',
+	  'string': 'green',
+	  'date': 'magenta',
+	  // "name": intentionally not styling
+	  'regexp': 'red'
+	};
+
+
+	function stylizeWithColor(str, styleType) {
+	  var style = inspect.styles[styleType];
+
+	  if (style) {
+	    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+	           '\u001b[' + inspect.colors[style][1] + 'm';
+	  } else {
+	    return str;
+	  }
+	}
+
+
+	function stylizeNoColor(str, styleType) {
+	  return str;
+	}
+
+
+	function arrayToHash(array) {
+	  var hash = {};
+
+	  array.forEach(function(val, idx) {
+	    hash[val] = true;
+	  });
+
+	  return hash;
+	}
+
+
+	function formatValue(ctx, value, recurseTimes) {
+	  // Provide a hook for user-specified inspect functions.
+	  // Check that value is an object with an inspect function on it
+	  if (ctx.customInspect &&
+	      value &&
+	      isFunction(value.inspect) &&
+	      // Filter out the util module, it's inspect function is special
+	      value.inspect !== exports.inspect &&
+	      // Also filter out any prototype objects using the circular check.
+	      !(value.constructor && value.constructor.prototype === value)) {
+	    var ret = value.inspect(recurseTimes, ctx);
+	    if (!isString(ret)) {
+	      ret = formatValue(ctx, ret, recurseTimes);
+	    }
+	    return ret;
+	  }
+
+	  // Primitive types cannot have properties
+	  var primitive = formatPrimitive(ctx, value);
+	  if (primitive) {
+	    return primitive;
+	  }
+
+	  // Look up the keys of the object.
+	  var keys = Object.keys(value);
+	  var visibleKeys = arrayToHash(keys);
+
+	  if (ctx.showHidden) {
+	    keys = Object.getOwnPropertyNames(value);
+	  }
+
+	  // IE doesn't make error fields non-enumerable
+	  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+	  if (isError(value)
+	      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+	    return formatError(value);
+	  }
+
+	  // Some type of object without properties can be shortcutted.
+	  if (keys.length === 0) {
+	    if (isFunction(value)) {
+	      var name = value.name ? ': ' + value.name : '';
+	      return ctx.stylize('[Function' + name + ']', 'special');
+	    }
+	    if (isRegExp(value)) {
+	      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+	    }
+	    if (isDate(value)) {
+	      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+	    }
+	    if (isError(value)) {
+	      return formatError(value);
+	    }
+	  }
+
+	  var base = '', array = false, braces = ['{', '}'];
+
+	  // Make Array say that they are Array
+	  if (isArray(value)) {
+	    array = true;
+	    braces = ['[', ']'];
+	  }
+
+	  // Make functions say that they are functions
+	  if (isFunction(value)) {
+	    var n = value.name ? ': ' + value.name : '';
+	    base = ' [Function' + n + ']';
+	  }
+
+	  // Make RegExps say that they are RegExps
+	  if (isRegExp(value)) {
+	    base = ' ' + RegExp.prototype.toString.call(value);
+	  }
+
+	  // Make dates with properties first say the date
+	  if (isDate(value)) {
+	    base = ' ' + Date.prototype.toUTCString.call(value);
+	  }
+
+	  // Make error with message first say the error
+	  if (isError(value)) {
+	    base = ' ' + formatError(value);
+	  }
+
+	  if (keys.length === 0 && (!array || value.length == 0)) {
+	    return braces[0] + base + braces[1];
+	  }
+
+	  if (recurseTimes < 0) {
+	    if (isRegExp(value)) {
+	      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+	    } else {
+	      return ctx.stylize('[Object]', 'special');
+	    }
+	  }
+
+	  ctx.seen.push(value);
+
+	  var output;
+	  if (array) {
+	    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+	  } else {
+	    output = keys.map(function(key) {
+	      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+	    });
+	  }
+
+	  ctx.seen.pop();
+
+	  return reduceToSingleString(output, base, braces);
+	}
+
+
+	function formatPrimitive(ctx, value) {
+	  if (isUndefined(value))
+	    return ctx.stylize('undefined', 'undefined');
+	  if (isString(value)) {
+	    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+	                                             .replace(/'/g, "\\'")
+	                                             .replace(/\\"/g, '"') + '\'';
+	    return ctx.stylize(simple, 'string');
+	  }
+	  if (isNumber(value))
+	    return ctx.stylize('' + value, 'number');
+	  if (isBoolean(value))
+	    return ctx.stylize('' + value, 'boolean');
+	  // For some reason typeof null is "object", so special case here.
+	  if (isNull(value))
+	    return ctx.stylize('null', 'null');
+	}
+
+
+	function formatError(value) {
+	  return '[' + Error.prototype.toString.call(value) + ']';
+	}
+
+
+	function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+	  var output = [];
+	  for (var i = 0, l = value.length; i < l; ++i) {
+	    if (hasOwnProperty(value, String(i))) {
+	      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+	          String(i), true));
+	    } else {
+	      output.push('');
+	    }
+	  }
+	  keys.forEach(function(key) {
+	    if (!key.match(/^\d+$/)) {
+	      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+	          key, true));
+	    }
+	  });
+	  return output;
+	}
+
+
+	function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+	  var name, str, desc;
+	  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+	  if (desc.get) {
+	    if (desc.set) {
+	      str = ctx.stylize('[Getter/Setter]', 'special');
+	    } else {
+	      str = ctx.stylize('[Getter]', 'special');
+	    }
+	  } else {
+	    if (desc.set) {
+	      str = ctx.stylize('[Setter]', 'special');
+	    }
+	  }
+	  if (!hasOwnProperty(visibleKeys, key)) {
+	    name = '[' + key + ']';
+	  }
+	  if (!str) {
+	    if (ctx.seen.indexOf(desc.value) < 0) {
+	      if (isNull(recurseTimes)) {
+	        str = formatValue(ctx, desc.value, null);
+	      } else {
+	        str = formatValue(ctx, desc.value, recurseTimes - 1);
+	      }
+	      if (str.indexOf('\n') > -1) {
+	        if (array) {
+	          str = str.split('\n').map(function(line) {
+	            return '  ' + line;
+	          }).join('\n').substr(2);
+	        } else {
+	          str = '\n' + str.split('\n').map(function(line) {
+	            return '   ' + line;
+	          }).join('\n');
+	        }
+	      }
+	    } else {
+	      str = ctx.stylize('[Circular]', 'special');
+	    }
+	  }
+	  if (isUndefined(name)) {
+	    if (array && key.match(/^\d+$/)) {
+	      return str;
+	    }
+	    name = JSON.stringify('' + key);
+	    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+	      name = name.substr(1, name.length - 2);
+	      name = ctx.stylize(name, 'name');
+	    } else {
+	      name = name.replace(/'/g, "\\'")
+	                 .replace(/\\"/g, '"')
+	                 .replace(/(^"|"$)/g, "'");
+	      name = ctx.stylize(name, 'string');
+	    }
+	  }
+
+	  return name + ': ' + str;
+	}
+
+
+	function reduceToSingleString(output, base, braces) {
+	  var numLinesEst = 0;
+	  var length = output.reduce(function(prev, cur) {
+	    numLinesEst++;
+	    if (cur.indexOf('\n') >= 0) numLinesEst++;
+	    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+	  }, 0);
+
+	  if (length > 60) {
+	    return braces[0] +
+	           (base === '' ? '' : base + '\n ') +
+	           ' ' +
+	           output.join(',\n  ') +
+	           ' ' +
+	           braces[1];
+	  }
+
+	  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+	}
+
+
+	// NOTE: These type checking functions intentionally don't use `instanceof`
+	// because it is fragile and can be easily faked with `Object.create()`.
+	function isArray(ar) {
+	  return Array.isArray(ar);
+	}
+	exports.isArray = isArray;
+
+	function isBoolean(arg) {
+	  return typeof arg === 'boolean';
+	}
+	exports.isBoolean = isBoolean;
+
+	function isNull(arg) {
+	  return arg === null;
+	}
+	exports.isNull = isNull;
+
+	function isNullOrUndefined(arg) {
+	  return arg == null;
+	}
+	exports.isNullOrUndefined = isNullOrUndefined;
+
+	function isNumber(arg) {
+	  return typeof arg === 'number';
+	}
+	exports.isNumber = isNumber;
+
+	function isString(arg) {
+	  return typeof arg === 'string';
+	}
+	exports.isString = isString;
+
+	function isSymbol(arg) {
+	  return typeof arg === 'symbol';
+	}
+	exports.isSymbol = isSymbol;
+
+	function isUndefined(arg) {
+	  return arg === void 0;
+	}
+	exports.isUndefined = isUndefined;
+
+	function isRegExp(re) {
+	  return isObject(re) && objectToString(re) === '[object RegExp]';
+	}
+	exports.isRegExp = isRegExp;
+
+	function isObject(arg) {
+	  return typeof arg === 'object' && arg !== null;
+	}
+	exports.isObject = isObject;
+
+	function isDate(d) {
+	  return isObject(d) && objectToString(d) === '[object Date]';
+	}
+	exports.isDate = isDate;
+
+	function isError(e) {
+	  return isObject(e) &&
+	      (objectToString(e) === '[object Error]' || e instanceof Error);
+	}
+	exports.isError = isError;
+
+	function isFunction(arg) {
+	  return typeof arg === 'function';
+	}
+	exports.isFunction = isFunction;
+
+	function isPrimitive(arg) {
+	  return arg === null ||
+	         typeof arg === 'boolean' ||
+	         typeof arg === 'number' ||
+	         typeof arg === 'string' ||
+	         typeof arg === 'symbol' ||  // ES6 symbol
+	         typeof arg === 'undefined';
+	}
+	exports.isPrimitive = isPrimitive;
+
+	exports.isBuffer = __webpack_require__(8);
+
+	function objectToString(o) {
+	  return Object.prototype.toString.call(o);
+	}
+
+
+	function pad(n) {
+	  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+	}
+
+
+	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+	              'Oct', 'Nov', 'Dec'];
+
+	// 26 Feb 16:19:34
+	function timestamp() {
+	  var d = new Date();
+	  var time = [pad(d.getHours()),
+	              pad(d.getMinutes()),
+	              pad(d.getSeconds())].join(':');
+	  return [d.getDate(), months[d.getMonth()], time].join(' ');
+	}
+
+
+	// log is just a thin wrapper to console.log that prepends a timestamp
+	exports.log = function() {
+	  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+	};
+
+
+	/**
+	 * Inherit the prototype methods from one constructor into another.
+	 *
+	 * The Function.prototype.inherits from lang.js rewritten as a standalone
+	 * function (not on Function.prototype). NOTE: If this file is to be loaded
+	 * during bootstrapping this function needs to be rewritten using some native
+	 * functions as prototype setup using normal JavaScript does not work as
+	 * expected during bootstrapping (see mirror.js in r114903).
+	 *
+	 * @param {function} ctor Constructor function which needs to inherit the
+	 *     prototype.
+	 * @param {function} superCtor Constructor function to inherit prototype from.
+	 */
+	exports.inherits = __webpack_require__(9);
+
+	exports._extend = function(origin, add) {
+	  // Don't do anything if add isn't an object
+	  if (!add || !isObject(add)) return origin;
+
+	  var keys = Object.keys(add);
+	  var i = keys.length;
+	  while (i--) {
+	    origin[keys[i]] = add[keys[i]];
+	  }
+	  return origin;
+	};
+
+	function hasOwnProperty(obj, prop) {
+	  return Object.prototype.hasOwnProperty.call(obj, prop);
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(7)))
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+	var process = module.exports = {};
+
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+
+	function defaultSetTimout() {
+	    throw new Error('setTimeout has not been defined');
+	}
+	function defaultClearTimeout () {
+	    throw new Error('clearTimeout has not been defined');
+	}
+	(function () {
+	    try {
+	        if (typeof setTimeout === 'function') {
+	            cachedSetTimeout = setTimeout;
+	        } else {
+	            cachedSetTimeout = defaultSetTimout;
+	        }
+	    } catch (e) {
+	        cachedSetTimeout = defaultSetTimout;
+	    }
+	    try {
+	        if (typeof clearTimeout === 'function') {
+	            cachedClearTimeout = clearTimeout;
+	        } else {
+	            cachedClearTimeout = defaultClearTimeout;
+	        }
+	    } catch (e) {
+	        cachedClearTimeout = defaultClearTimeout;
+	    }
+	} ())
+	function runTimeout(fun) {
+	    if (cachedSetTimeout === setTimeout) {
+	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    // if setTimeout wasn't available but was latter defined
+	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	        cachedSetTimeout = setTimeout;
+	        return setTimeout(fun, 0);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedSetTimeout(fun, 0);
+	    } catch(e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	            return cachedSetTimeout.call(null, fun, 0);
+	        } catch(e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	            return cachedSetTimeout.call(this, fun, 0);
+	        }
+	    }
+
+
+	}
+	function runClearTimeout(marker) {
+	    if (cachedClearTimeout === clearTimeout) {
+	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    // if clearTimeout wasn't available but was latter defined
+	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	        cachedClearTimeout = clearTimeout;
+	        return clearTimeout(marker);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedClearTimeout(marker);
+	    } catch (e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	            return cachedClearTimeout.call(null, marker);
+	        } catch (e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	            return cachedClearTimeout.call(this, marker);
+	        }
+	    }
+
+
+
+	}
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = runTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    runClearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        runTimeout(drainQueue);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+	process.prependListener = noop;
+	process.prependOnceListener = noop;
+
+	process.listeners = function (name) { return [] }
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	module.exports = function isBuffer(arg) {
+	  return arg && typeof arg === 'object'
+	    && typeof arg.copy === 'function'
+	    && typeof arg.fill === 'function'
+	    && typeof arg.readUInt8 === 'function';
+	}
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	if (typeof Object.create === 'function') {
+	  // implementation from standard node.js 'util' module
+	  module.exports = function inherits(ctor, superCtor) {
+	    ctor.super_ = superCtor
+	    ctor.prototype = Object.create(superCtor.prototype, {
+	      constructor: {
+	        value: ctor,
+	        enumerable: false,
+	        writable: true,
+	        configurable: true
+	      }
+	    });
+	  };
+	} else {
+	  // old school shim for old browsers
+	  module.exports = function inherits(ctor, superCtor) {
+	    ctor.super_ = superCtor
+	    var TempCtor = function () {}
+	    TempCtor.prototype = superCtor.prototype
+	    ctor.prototype = new TempCtor()
+	    ctor.prototype.constructor = ctor
+	  }
+	}
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * @module 101/defaults
+	 */
+
+	var isObject = __webpack_require__(11);
+	var isBoolean = __webpack_require__(13);
+	var exists = __webpack_require__(12);
+
+	/**
+	 * Mixes in properties from source into target when
+	 * the property is not a property of `target`
+	 * @param  {Object} [target] Mix into
+	 * @param  {Object} source The defaults description
+	 * @return {Object}        THe resulting target
+	 */
+	module.exports = defaults;
+
+	function defaults (target, source, deep) {
+	  if (arguments.length === 1) {
+	    source = target;
+	    return function (target) {
+	      return defaults(target, source);
+	    };
+	  } else if (isBoolean(source)) {
+	    deep = source;
+	    source = target;
+	    return function (target) {
+	      return defaults(target, source, deep);
+	    };
+	  }
+	  target = target || {};
+	  deep = deep || false;
+	  if (!source) {
+	    return target;
+	  }
+	  return reduceObject(target, source, deep);
+	}
+
+	function reduceObject (target, source, deep) {
+	  return Object.keys(source).reduce(function (target, key) {
+	    if (isObject(target[key]) && isObject(source[key]) && deep) {
+	      reduceObject(target[key], source[key]);
+	      return target;
+	    }
+	    target[key] = exists(target[key]) ? target[key] : source[key];
+	    return target;
+	  }, target);
+	}
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Functional version of a strict object check (Arrays and RegExps are not objects)
+	 * @module 101/is-object
+	 */
+
+	/**
+	 * @function module:101/is-object
+	 * @param {*} val - value checked to be an object
+	 * @return {boolean} Whether the value is an object or not
+	 */
+	var exists = __webpack_require__(12);
+
+	module.exports = isObject;
+
+	function isObject (val) {
+	  return typeof val === 'object' &&
+	    exists(val) &&
+	    !Array.isArray(val) &&
+	    !(val instanceof RegExp) &&
+	    !(val instanceof String) &&
+	    !(val instanceof Number);
+	}
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	/**
+	 * @module {function} 101/exists
+	 * @type {function}
+	 */
+
+	/**
+	 * Returns false for null and undefined, true for everything else.
+	 * @function module:101/exists
+	 * @param val {*} - value to be existance checked
+	 * @return {boolean} whether the value exists or not
+	 */
+	module.exports = exists;
+
+	function exists (val) {
+	  return val !== undefined && val !== null;
+	}
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	/**
+	 * @module 101/is-boolean
+	 */
+
+	/**
+	 * Functional version of val typeof 'boolean'
+	 * @function module:101/is-boolean
+	 * @param {*} val - value checked to be a boolean
+	 * @return {boolean} Whether the value is a boolean or not
+	 */
+	module.exports = isBoolean;
+
+	function isBoolean (val) {
+	  return typeof val === 'boolean';
+	}
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -4331,27 +6308,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.parse = exports.getChapter = undefined;
 
-	var _escapeStringRegexp = __webpack_require__(3);
+	var _escapeStringRegexp = __webpack_require__(15);
 
 	var _escapeStringRegexp2 = _interopRequireDefault(_escapeStringRegexp);
 
-	var _reference = __webpack_require__(4);
+	var _reference = __webpack_require__(16);
 
 	var _reference2 = _interopRequireDefault(_reference);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function normalize(str) {
+	  return str.toLowerCase().trim();
+	}
 
 	var chapters = [["Al-Fatihah", "The Opener", "الفاتحة"], ["Al-Baqarah", "The Cow", "البقرة"], ["Ali 'Imran", "Family of Imran", "آل عمران"], ["An-Nisa", "The Women", "النساء"], ["Al-Ma'idah", "The Table Spread", "المائدة"], ["Al-An'am", "The Cattle", "الأنعام"], ["Al-A'raf", "The Heights", "الأعراف"], ["Al-Anfal", "The Spoils of War", "الأنفال"], ["At-Tawbah", "The Repentance", "التوبة"], ["Yunus", "Jonah", "يونس"], ["Hud", "Hud", "هود"], ["Yusuf", "Joseph", "يوسف"], ["Ar-Ra'd", "The Thunder", "الرّعد"], ["Ibrahim", "Abrahim", "إبراهيم"], ["Al-Hijr", "The Rocky Tract", "الحجر"], ["An-Nahl", "The Bee", "النحل"], ["Al-Isra", "The Night Journey", "الإسراء"], ["Al-Kahf", "The Cave", "الكهف"], ["Maryam", "Mary", "مريم"], ["Taha", "Ta-Ha", "طه"], ["Al-Anbya", "The Prophets", "الأنبياء"], ["Al-Haj", "The Pilgrimage", "الحج"], ["Al-Mu'minun", "The Believers", "المؤمنون"], ["An-Nur", "The Light", "النّور"], ["Al-Furqan", "The Criterian", "الفرقان"], ["Ash-Shu'ara", "The Poets", "الشعراء"], ["An-Naml", "The Ant", "النمل"], ["Al-Qasas", "The Stories", "القصص"], ["Al-'Ankabut", "The Spider", "العنكبوت"], ["Ar-Rum", "The Romans", "الروم"], ["Luqman", "Luqman", "لقمان"], ["As-Sajdah", "The Prostration", "السجدة"], ["Al-Ahzab", "The Combined Forces", "الأحزاب"], ["Saba", "Sheba", "سبإ"], ["Fatir", "Originator", "فاطر"], ["Ya-Sin", "Ya Sin", "يس"], ["As-Saffat", "Those who set the Ranks", "الصّافّات"], ["Sad", "The Letter \"Saad\"", "ص"], ["Az-Zumar", "The Troops", "الزمر"], ["Ghafir", "The Forgiver", "غافر"], ["Fussilat", "Explained in Detail", "فصّلت"], ["Ash-Shuraa", "The Consultation", "الشورى"], ["Az-Zukhruf", "The Ornaments of Gold", "الزخرف"], ["Ad-Dukhan", "The Smoke", "الدخان"], ["Al-Jathiyah", "The Crouching", "الجاثية"], ["Al-Ahqaf", "The Wind-Curved Sandhills", "الأحقاف"], ["Muhammad", "Muhammad", "محمّـد"], ["Al-Fath", "The Victory", "الفتح"], ["Al-Hujurat", "The Rooms", "الحُـجُـرات"], ["Qaf", "The Letter \"Qaf\"", "ق"], ["Adh-Dhariyat", "The Winnowing Winds", "الذاريات"], ["At-Tur", "The Mount", "الـطور"], ["An-Najm", "The Star", "الـنحـم"], ["Al-Qamar", "The Moon", "الـقمـر"], ["Ar-Rahman", "The Beneficent", "الـرحـمـن"], ["Al-Waqi'ah", "The Inevitable", "الواقيـة"], ["Al-Hadid", "The Iron", "الحـديد"], ["Al-Mujadila", "The Pleading Woman", "الـمجادلـة"], ["Al-Hashr", "The Exile", "الـحـشـر"], ["Al-Mumtahanah", "She that is to be examined", "الـمـمـتـحنة"], ["As-Saf", "The Ranks", "الـصّـف"], ["Al-Jumu'ah", "The Congregation, Friday", "الـجـمـعـة"], ["Al-Munafiqun", "The Hypocrites", "الـمنافقون"], ["At-Taghabun", "The Mutual Disillusion", "الـتغابن"], ["At-Talaq", "The Divorce", "الـطلاق"], ["At-Tahrim", "The Prohibtiion", "الـتحريم"], ["Al-Mulk", "The Sovereignty", "الـملك"], ["Al-Qalam", "The Pen", "الـقـلـم"], ["Al-Haqqah", "The Reality", "الـحاقّـة"], ["Al-Ma'arij", "The Ascending Stairways", "الـمعارج"], ["Nuh", "Noah", "نوح"], ["Al-Jinn", "The Jinn", "الجن"], ["Al-Muzzammil", "The Enshrouded One", "الـمـزّمّـل"], ["Al-Muddaththir", "The Cloaked One", "الـمّـدّثّـر"], ["Al-Qiyamah", "The Resurrection", "الـقـيامـة"], ["Al-Insan", "The Man", "الإنسان"], ["Al-Mursalat", "The Emissaries", "الـمرسلات"], ["An-Naba", "The Tidings", "الـنبإ"], ["An-Nazi'at", "Those who drag forth", "الـنازعات"], ["'Abasa", "He Frowned", "عبس"], ["At-Takwir", "The Overthrowing", "التكوير"], ["Al-Infitar", "The Cleaving", "الانفطار"], ["Al-Mutaffifin", "The Defrauding", "المطـفـفين"], ["Al-Inshiqaq", "The Sundering", "الانشقاق"], ["Al-Buruj", "The Mansions of the Stars", "البروج"], ["At-Tariq", "The Nightcommer", "الـطارق"], ["Al-A'la", "The Most High", "الأعـلى"], ["Al-Ghashiyah", "The Overwhelming", "الغاشـيـة"], ["Al-Fajr", "The Dawn", "الفجر"], ["Al-Balad", "The City", "الـبلد"], ["Ash-Shams", "The Sun", "الـشـمـس"], ["Al-Layl", "The Night", "اللـيـل"], ["Ad-Duhaa", "The Morning Hours", "الضـحى"], ["Ash-Sharh", "The Relief", "الـشرح"], ["At-Tin", "The Fig", "الـتين"], ["Al-'Alaq", "The Clot", "الـعلق"], ["Al-Qadr", "The Power", "الـقدر"], ["Al-Bayyinah", "The Clear Proof", "الـبينة"], ["Az-Zalzalah", "The Earthquake", "الـزلزلة"], ["Al-'Adiyat", "The Courser", "الـعاديات"], ["Al-Qari'ah", "The Calamity", "الـقارعـة"], ["At-Takathur", "The Rivalry in world increase", "الـتكاثر"], ["Al-'Asr", "The Declining Day", "الـعصر"], ["Al-Humazah", "The Traducer", "الـهمزة"], ["Al-Fil", "The Elephant", "الـفيل"], ["Quraysh", "Quraysh", "قريش"], ["Al-Ma'un", "The Small Kindesses", "المـاعون"], ["Al-Kawthar", "The Abundance", "الـكوثر"], ["Al-Kafirun", "The Disbelievers", "الـكافرون"], ["An-Nasr", "The Divine Support", "الـنصر"], ["Al-Masad", "The Palm Fiber", "الـمسد"], ["Al-Ikhlas", "The Sincerity", "الإخلاص"], ["Al-Falaq", "The Daybreak", "الـفلق"], ["An-Nas", "The Mankind", "الـناس"]];
 
 	// Make the array lowercase so its not case-sensitive
 	chapters = chapters.map(function (list) {
 	  return list.map(function (book) {
-	    return book.toLowerCase().trim();
+	    return normalize(book);
 	  });
 	});
 
 	function getChapter(chapter) {
 	  var c = parseInt(chapter);
+	  chapter = normalize(chapter);
 
 	  // Chapter is already a number
 	  if (!isNaN(c)) return c;
@@ -4360,9 +6342,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // Attempt to find it in the array
 	  chapters.forEach(function (b, idx) {
-	    if (b.indexOf(chapter.toLowerCase().trim()) !== -1) {
+	    if (b.indexOf(chapter) !== -1) {
 	      // Do +1 as array starts at zero
 	      bookIndex = idx + 1;
+	      return;
 	    }
 	  });
 
@@ -4385,9 +6368,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Koran 1:111
 	   * Qur'an 1:111
 	   */
-	  pattern = '\n    (?:q|quran|koran|qur\\\'an)\n      \\s*\n      ([\\d]{1,3})\n      (?::\\s*\n        ([\\d\\s\\-,]+)\n      )?\n    ';
+	  pattern = '(?:q|quran|koran|qur\\\'an)\\s*';
+	  pattern += '([\\d]{1,3})';
+	  pattern += '(?::\\s*([\\d\\s\\-,]+))?';
 
-	  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
+	  regex = new RegExp(pattern, 'gi');
 	  while (match = regex.exec(input)) {
 	    var ref = new _reference2.default();
 
@@ -4410,9 +6395,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).join('|');
 	  }).join('|');
 
-	  pattern = '\n    (?:surat|\u0633\u0648\u0631\u0629)?\n    \\s*\n    (' + chapterList + '):?\n    \\s*\n      (?:([\\d]{1,3})\\s*:)?\n      \\s+\n      ([\\d\\s\\-,]+)\n    ';
+	  pattern = '(?:surat|سورة)?\\s*';
+	  pattern += '(' + chapterList + '):?\\s*';
+	  pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
+	  pattern += '([\\d\\s\\-,]+)';
 
-	  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
+	  regex = new RegExp(pattern, 'gi');
 	  while (match = regex.exec(input)) {
 	    var _ref = new _reference2.default();
 
@@ -4433,7 +6421,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.parse = parse;
 
 /***/ },
-/* 3 */
+/* 15 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -4450,7 +6438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 4 */
+/* 16 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -4551,7 +6539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Reference;
 
 /***/ },
-/* 5 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4561,11 +6549,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.parse = exports.getBook = undefined;
 
-	var _escapeStringRegexp = __webpack_require__(3);
+	var _escapeStringRegexp = __webpack_require__(15);
 
 	var _escapeStringRegexp2 = _interopRequireDefault(_escapeStringRegexp);
 
-	var _reference = __webpack_require__(4);
+	var _reference = __webpack_require__(16);
 
 	var _reference2 = _interopRequireDefault(_reference);
 
@@ -4573,19 +6561,88 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+	function normalize(str) {
+	  return str.toLowerCase().trim();
+	}
+
 	var books = {
-	  psa: ['Ps', 'Psalms', 'Psalm']
+	  'gen': ['Genesis', 'Gen', 'Ge', 'Gn'],
+	  'exo': ['Exodus', 'Exo', 'Ex', 'Exod'],
+	  'lev': ['Leviticus', 'Lev', 'Le', 'Lv'],
+	  'num': ['Numbers', 'Num', 'Nu', 'Nm', 'Nb'],
+	  'deu': ['Deuteronomy', 'Deut', 'Dt'],
+	  'jos': ['Joshua', 'Josh', 'Jos', 'Jsh'],
+	  'jdg': ['Judges', 'Judg', 'Jdg', 'Jg', 'Jdgs'],
+	  'rut': ['Ruth', 'Rth', 'Ru'],
+	  '1sa': ['1 Samuel', '1 Sam', '1 Sa', '1Samuel', '1S', '1 Sm', '1Sa', '1Sam', '1st Samuel', 'First Samuel'],
+	  '2sa': ['2 Samuel', '2 Sam', '2 Sa', '2S', '2 Sm', '2Sa', '2Sam', '2Samuel', '2nd Samuel', 'Second Samuel'],
+	  '1ki': ['1 Kings', '1 Kgs', '1 Ki', '1K', '1Kgs', '1Ki', '1Kings', '1st Kgs', '1st Kings', 'First Kings', 'First Kgs', '1Kin'],
+	  '2ki': ['2 Kings', '2 Kgs', '2 Ki', '2K', '2Kgs', '2Ki', '2Kings', '2nd Kgs', '2nd Kings', 'Second Kings', 'Second Kgs', '2Kin'],
+	  '1ch': ['1 Chronicles', '1 Chron', '1 Ch', '1Ch', '1 Chr', '1Chr', '1Chron', '1Chronicles', '1st Chronicles', 'First Chronicles'],
+	  '2ch': ['2 Chronicles', '2 Chron', '2 Ch', '2Ch', '2Chr', '2Chron', '2Chronicles', '2nd Chronicles', 'Second Chronicles'],
+	  'ezr': ['Ezra', 'Ezra', 'Ezr'],
+	  'neh': ['Nehemiah', 'Neh', 'Ne'],
+	  'est': ['Esther', 'Esth', 'Es'],
+	  'job': ['Job', 'Job', 'Job', 'Jb'],
+	  'psa': ['Psalm', 'Pslm', 'Ps', 'Psalms', 'Psa', 'Psm', 'Pss'],
+	  'pro': ['Proverbs', 'Prov', 'Pr', 'Prv'],
+	  'ecc': ['Ecclesiastes', 'Eccles', 'Ec', 'Ecc', 'Qoh', 'Qoheleth'],
+	  'sol': ['Song of Solomon', 'Song', 'So', 'Canticle of Canticles', 'Canticles', 'Song of Songs', 'SOS'],
+	  'isa': ['Isaiah', 'Isa', 'Is'],
+	  'jer': ['Jeremiah', 'Jer', 'Je', 'Jr'],
+	  'lam': ['Lamentations', 'Lam', 'La'],
+	  'eze': ['Ezekiel', 'Ezek', 'Eze', 'Ezk'],
+	  'dan': ['Daniel', 'Dan', 'Da', 'Dn'],
+	  'hos': ['Hosea', 'Hos', 'Ho'],
+	  'joe': ['Joel', 'Joel', 'Joe', 'Jl'],
+	  'amo': ['Amos', 'Amos', 'Am'],
+	  'oba': ['Obadiah', 'Obad', 'Ob'],
+	  'jon': ['Jonah', 'Jnh', 'Jon'],
+	  'mic': ['Micah', 'Micah', 'Mic'],
+	  'nah': ['Nahum', 'Nah', 'Na'],
+	  'hab': ['Habakkuk', 'Hab', 'Hab'],
+	  'zep': ['Zephaniah', 'Zeph', 'Zep', 'Zp'],
+	  'hag': ['Haggai', 'Haggai', 'Hag', 'Hg'],
+	  'zec': ['Zechariah', 'Zech', 'Zec', 'Zc'],
+	  'mal': ['Malachi', 'Mal', 'Mal', 'Ml'],
+	  'mat': ['Matthew', 'Matt', 'Mt'],
+	  'mar': ['Mark', 'Mrk', 'Mk', 'Mr'],
+	  'luk': ['Luke', 'Luk', 'Lk'],
+	  'joh': ['John', 'John', 'Jn', 'Jhn'],
+	  'act': ['Acts', 'Acts', 'Ac'],
+	  'rom': ['Romans', 'Rom', 'Ro', 'Rm'],
+	  '1co': ['1 Corinthians', '1 Cor', '1 Co', '1Co', '1Cor', '1Corinthians', '1st Corinthians', 'First Corinthians'],
+	  '2co': ['2 Corinthians', '2 Cor', '2 Co', '2Co', '2Cor', '2Corinthians', '2nd Corinthians', 'Second Corinthians'],
+	  'gal': ['Galatians', 'Gal', 'Ga'],
+	  'eph': ['Ephesians', 'Ephes', 'Eph'],
+	  'phi': ['Philippians', 'Phil', 'Php'],
+	  'col': ['Colossians', 'Col', 'Col'],
+	  '1th': ['1 Thessalonians', '1 Thess', '1 Th', '1Th', '1Thes', '1Thess', '1Thessalonians', '1st Thessalonians', 'First Thessalonians'],
+	  '2th': ['2 Thessalonians', '2 Thess', '2 Th', '2Th', '2Thes', '2Thess', '2Thessalonians', '2nd Thessalonians', 'Second Thessalonians'],
+	  '1ti': ['1 Timothy', '1 Tim', '1 Ti', '1Ti', '1Tim', '1Timothy', '1st Timothy', 'First Timothy'],
+	  '2ti': ['2 Timothy', '2 Tim', '2 Ti', '2Ti', '2Tim', '2Timothy', '2nd Timothy', 'Second Timothy'],
+	  'tit': ['Titus', 'Titus', 'Tit'],
+	  'phm': ['Philemon', 'Philem', 'Phm'],
+	  'heb': ['Hebrews', 'Hebrews', 'Heb'],
+	  'jam': ['James', 'James', 'Jas', 'Jm'],
+	  '1pe': ['1 Peter', '1 Pet', '1 Pe', '1Pe', '1Pet', '1 Pt', '1Pt', '1Peter', '1st Peter', 'First Peter'],
+	  '2pe': ['2 Peter', '2 Pet', '2 Pe', '2Pe', '2Pet', '2 Pt', '2Pt', '2Peter', '2nd Peter', 'Second Peter'],
+	  '1jo': ['1 John', '1 John', '1 Jn', '1Jn', '1Jo', '1Joh', '1 Jhn', '1Jhn', '1John', '1st John', 'First John'],
+	  '2jo': ['2 John', '2 John', '2 Jn', '2Jn', '2Jo', '2Joh', '2 Jhn', '2Jhn', '2John', '2nd John', 'Second John'],
+	  '3jo': ['3 John', '3 John', '3 Jn', '3Jn', '3Jo', '3Joh', '3 Jhn', '3Jhn', '3John', '3rd John', 'Third John'],
+	  'jud': ['Jude', 'Jude', 'Jud'],
+	  'rev': ['Revelation', 'Rev', 'Re', 'The Revelation']
 	};
 
 	// Make the array lowercase so its not case-sensitive
 	Object.keys(books).forEach(function (bookId) {
 	  books[bookId] = books[bookId].map(function (book) {
-	    return book.toLowerCase();
+	    return normalize(book);
 	  });
 	});
 
 	function getBook(title) {
-	  title = title.toLowerCase();
+	  title = normalize(title);
 
 	  // If they used an actual normalized version, return it
 	  if (typeof books[title] !== 'undefined') return title;
@@ -4639,9 +6696,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	  bookList = bookList.join('|');
 
-	  pattern = '\n    (' + bookList + ')\n    \\s*\n      ([\\d]{1,3})\\s*:?\n      \\s*\n      ([\\d\\s\\-,]+)?\n    ';
+	  pattern = '(' + bookList + ')\\s*';
+	  pattern += '([\\d]{1,3})\\s*:?\\s*';
+	  pattern += '([\\d\\s\\-,]+)?';
 
-	  regex = new RegExp(pattern.replace(/[\n\s]+/g, ''), 'gi');
+	  regex = new RegExp(pattern, 'gi');
 	  while (match = regex.exec(input)) {
 	    var ref = new _reference2.default();
 
@@ -4663,7 +6722,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.parse = parse;
 
 /***/ },
-/* 6 */
+/* 18 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4676,7 +6735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = template;
 
 /***/ },
-/* 7 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
