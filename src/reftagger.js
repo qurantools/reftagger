@@ -23,6 +23,12 @@ class Reftagger {
       iframes: true, // From match.js
       exclude: [], // From match.js
       theme: 'alkotob', // dark, light, transparent, <custom>
+      quran: {
+        version: 'quran'
+      },
+      bible: {
+        version: 'tm'
+      }
     };
   }
 
@@ -240,11 +246,13 @@ class Reftagger {
         self._tippy.update(this);
 
         // Initialize the GraphQL query
+        const bookSettings = self.settings[bookType];
         const query = `
           query ($code: String!, $chapter: Int, $limit: Int!, $start: Int) {
             ${bookType} (code: $code) {
               name
               direction
+              language
               verses(chapter: $chapter, start: $start, limit: $limit) {
                 chapter
                 number
@@ -254,7 +262,7 @@ class Reftagger {
           }
         `;
         const queryVars = {
-          code: bookType,
+          code: bookSettings.version,
           chapter: parseInt(chapter),
           limit: 2,
           start: parseInt(verses.match(/(\d+)/g)[0]) // Get first number
@@ -268,7 +276,7 @@ class Reftagger {
 
           let html = '';
           res.data[bookType][0].verses.forEach(verse => {
-            html += `<span class="verse">${verse.text}<sup>${verse.number}</sup></span>`;
+            html += `<span class="verse">${verse.text}<sup>${verse.number}</sup></span> `;
           });
 
           // Update UI text
