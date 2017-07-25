@@ -1,13 +1,19 @@
 language: node_js
 node_js:
-  - "stable"
+- stable
 sudo: false
 script: npm run lint && npm test && gulp coverage
 after_success:
-  - npm install -g codeclimate-test-reporter
-  - codeclimate-test-reporter < coverage/lcov.info
-addons:
-  artifacts:
-    s3_region: eu-central-1
-    paths:
-      - ./dist
+- npm install -g codeclimate-test-reporter
+- codeclimate-test-reporter < coverage/lcov.info
+deploy:
+  provider: s3
+  access_key_id: AKIAIPO3RJM5N3L5K4UQ
+  secret_access_key:
+    secure: Zii+c4gmFIAoAIgfYFwSSJkDT3jWXB9o7GGjX640W9VtjaLr7Q5YKx4BWB8i4/xEnzINeo/+ISAabCTpQYfsrpNqSvEYg/yx/RA4sRxTl4WtLBOThuGsfbomjnO4MLgOUPTSRDvWg2fEwD9CGnbkcaCPPmAd4C7C4y6phjzlZVEMkwOxtOB1K66nP948tTun0VHJxSTCcpBECVvmcl7WwUxyylw9m2qScCud/HYsUnosuCXQs+zh9B4psgDLhlSyfd+cR+4oN4mdOo62+EjBywF1zXPbP9bD7svYv9qxovoy2GBxwBVMbi0IkNqIIa0P21biyq4ZxQCGrvakNwQHNrVProrRRe/9TVpq3umNnHV0Tl6i9qy5TJebvNPijeO8WmuqBcHODDQ9iWmkbtfWIEJchlzq49enU38D/CcTfbbQhWF8luko/iGW0qctcQNOg7xLNXBzp3DRyzp18TRCjiojmkYSZVea9zRuQiarRhAm4zgw8h5wrYd773tGfpkD64PZnH4aJvKG9QP9bp6ZXtPJ5BAc9F7dVrTtZMkjVv0hcANW+2JiWW/FcVkawIxP9/5frcYDhIgLEAC8sj1L8cY5kvVHg5uXxLkD6ASV2vfkmMUohwPSOErRxywuHrTZLsxzCyrc8AFQBzBHx7k0pgJDJCJT4T8eW9OdDe8EyRk=
+  bucket: cdn.alkotob.org
+  local-dir: dist
+  upload-dir: lib
+  acl: public_read
+  on:
+    repo: alkotob/reftagger
