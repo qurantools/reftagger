@@ -15,5 +15,6 @@ deploy:
   local-dir: dist
   upload-dir: lib
   acl: public_read
+  skip_cleanup: true
   on:
     repo: alkotob/reftagger
