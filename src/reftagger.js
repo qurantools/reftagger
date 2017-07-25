@@ -123,8 +123,7 @@ class Reftagger {
     let style = document.createElement('link');
     style.setAttribute('rel', 'stylesheet');
     style.setAttribute('type', 'text/css');
-    // style.setAttribute('href', 'https://cdn.rawgit.com/alkotob/reftagger/master/dist/reftagger.min.css'); // TODO: use own domain
-    style.setAttribute('href', '/dist/reftagger.min.css');
+    style.setAttribute('href', 'https://cdn.alkotob.org/lib/reftagger.min.css');
     document.getElementsByTagName('head')[0].appendChild(style);
 
     // Append tooltip html
