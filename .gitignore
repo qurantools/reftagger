@@ -30,3 +30,6 @@ tmp
 # Users Environment Variables
 .lock-wscript
 .DS_Store
+
+# Artifacts
+dist
