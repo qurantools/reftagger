@@ -16,5 +16,6 @@ deploy:
   upload-dir: lib
   acl: public_read
   skip_cleanup: true
+  region: eu-central-1
   on:
     repo: alkotob/reftagger
