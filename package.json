@@ -10,7 +10,8 @@
     "test-browser": "gulp test-browser",
     "watch": "gulp watch",
     "build": "gulp build",
-    "coverage": "gulp coverage"
+    "coverage": "gulp coverage",
+    "server": "python -m SimpleHTTPServer 8000"
   },
   "repository": {
     "type": "git",

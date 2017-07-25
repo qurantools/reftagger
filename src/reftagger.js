@@ -205,6 +205,7 @@ class Reftagger {
     // Setup references to update elements
     const template = document.getElementById('alkotob-tooltip');
     const reference = document.getElementById('alkotob-reference');
+    const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
       position: 'auto',
@@ -238,20 +239,44 @@ class Reftagger {
 
         self._tippy.update(this);
 
-        // TODO: load the api request
-        // Implement: https://github.com/tjmehta/graphql-fetch?files=1
+        // Initialize the GraphQL query
+        const query = `
+          query ($code: String!, $chapter: Int, $limit: Int!, $start: Int) {
+            ${bookType} (code: $code) {
+              name
+              direction
+              verses(chapter: $chapter, start: $start, limit: $limit) {
+                chapter
+                number
+                text
+              }
+            }
+          }
+        `;
+        const queryVars = {
+          code: bookType,
+          chapter: parseInt(chapter),
+          limit: 2,
+          start: parseInt(verses.match(/(\d+)/g)[0]) // Get first number
+        };
 
-        // fetch('https://unsplash.it/200/?random')
-        //   .then(resp => resp.blob())
-        //   .then(blob => {
-        //     const refData = self._tippy.getReferenceData(el);
-        //     template.innerHTML = `fjsdklfjdslkfjkdls ${new Date()}`;
-        //     self._tippy.loading = false;
-        //     self._tippy.update(this);
-        //   }).catch(e => {
-        //     // template.innerHTML = 'Loading failed';
-        //     self._tippy.loading = false;
-        //   });
+        fetch(query, queryVars).then(res => {
+          if (res.errors) {
+            console.log(res.errors);
+            return;
+          }
+
+          let html = '';
+          res.data[bookType][0].verses.forEach(verse => {
+            html += `<span class="verse">${verse.text}<sup>${verse.number}</sup></span>`;
+          });
+
+          // Update UI text
+          verseText.innerHTML = html;
+
+          self._tippy.loading = false;
+          self._tippy.update(this);
+        });
       },
 
       onHide() {
@@ -259,7 +284,13 @@ class Reftagger {
       },
 
       onHidden() {
-        // template.innerHTML = 'loading';
+        // Set loading spinner
+        verseText.innerHTML = `<div class="sk-folding-cube">
+          <div class="sk-cube1 sk-cube"></div>
+          <div class="sk-cube2 sk-cube"></div>
+          <div class="sk-cube4 sk-cube"></div>
+          <div class="sk-cube3 sk-cube"></div>
+        </div>`;
       }
     });
   }
