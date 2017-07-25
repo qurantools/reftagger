@@ -9,6 +9,5 @@ after_success:
 addons:
   artifacts:
     s3_region: eu-central-1
-    working_dir: dist
     paths:
-      - $(ls | tr "\n" ":")
+      - dist
