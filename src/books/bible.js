@@ -130,5 +130,67 @@ function parse(input) {
   return results;
 };
 
-export default { parse, getBook };
-export { getBook, parse };
+/**
+ * Splitting the verses up for set parsing
+ */
+function splitVerses(verses) {
+  return verses.split(',').map(set => set.match(/(\d+)/g, set));
+}
+
+/**
+ * Function for building the query to send to GraphQL
+ */
+function queryBuilder(verses) {
+  let versesQuery = '';
+  splitVerses(verses).forEach(set => {
+    const start = set[0];
+    const end = set[1];
+
+    // If there is an end verse limit needs to be set, otherwise
+    // we will just use a limit: 1
+    const limit = end ? `end: ${end}` : `limit: 1`;
+    versesQuery += `
+      verses${start}: verses(chapter: $chapter, start: ${start}, ${limit}) {
+        chapter
+        chapterName
+        number
+        text
+      }
+    `;
+  });
+
+  // Initialize the GraphQL query
+  return `
+    query ($code: String!, $chapter: Int, $book: String) {
+      bible (code: $code) {
+        name
+        direction
+        language
+        books (code: $book) {
+          name
+          ${versesQuery}
+        }
+      }
+    }
+  `;
+}
+
+function renderVerses(verses, res) {
+  const root = res.data.bible[0].books[0];
+  const verseSets = splitVerses(verses);
+
+  let html = '';
+  verseSets.forEach((set, idx) => {
+    const start = set[0];
+    root[`verses${start}`].forEach(verse => {
+      html += `<span class="verse">${verse.text} <sup>${verse.number}</sup></span> `;
+    });
+
+    if (idx < verseSets.length - 1) html += ' &hellip; ';
+  });
+
+  return html;
+}
+
+export default { parse, getBook, queryBuilder, renderVerses };
+export { getBook, parse, queryBuilder, renderVerses };

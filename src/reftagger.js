@@ -245,27 +245,15 @@ class Reftagger {
 
         self._tippy.update(this);
 
-        // Initialize the GraphQL query
+        const query = bookType === 'quran' ?
+          Quran.queryBuilder(verses) :
+          Bible.queryBuilder(verses);
+
         const bookSettings = self.settings[bookType];
-        const query = `
-          query ($code: String!, $chapter: Int, $limit: Int!, $start: Int) {
-            ${bookType} (code: $code) {
-              name
-              direction
-              language
-              verses(chapter: $chapter, start: $start, limit: $limit) {
-                chapter
-                number
-                text
-              }
-            }
-          }
-        `;
         const queryVars = {
+          book,
           code: bookSettings.version,
-          chapter: parseInt(chapter),
-          limit: 2,
-          start: parseInt(verses.match(/(\d+)/g)[0]) // Get first number
+          chapter: parseInt(chapter)
         };
 
         fetch(query, queryVars).then(res => {
@@ -274,10 +262,9 @@ class Reftagger {
             return;
           }
 
-          let html = '';
-          res.data[bookType][0].verses.forEach(verse => {
-            html += `<span class="verse">${verse.text}<sup>${verse.number}</sup></span> `;
-          });
+          const html = bookType === 'quran' ?
+            Quran.renderVerses(verses, res) :
+            Bible.renderVerses(verses, res);
 
           // Update UI text
           verseText.innerHTML = html;

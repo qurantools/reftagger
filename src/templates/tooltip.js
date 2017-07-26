@@ -7,7 +7,12 @@ const template = `
     <div id="alkotob-reference"></div>
     <div class="bismillah">﷽</div>
     <div id="alkotob-verse-text">
-      فقوله - تعالى -: ﴿ اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ﴾، إخبار بأنه المنفرِد بالإلهية لجميع الخلائق، فلا معبود بحقٍّ إلاَّ هو - سبحانه - وهو المستَحق للعِبادة، وبهذه الكلمة أرْسَل الله الرُّسل، وأنزَل
+      <div class="sk-folding-cube">
+        <div class="sk-cube1 sk-cube"></div>
+        <div class="sk-cube2 sk-cube"></div>
+        <div class="sk-cube4 sk-cube"></div>
+        <div class="sk-cube3 sk-cube"></div>
+      </div>
     </div>
     <div id="alkotob-copyright">
       <a target="_blank" href="https://alkotob.org/?utm_source=reftagger">alkotob.org</a>
