@@ -134,7 +134,10 @@ function parse(input) {
  * Splitting the verses up for set parsing
  */
 function splitVerses(verses) {
-  return verses.split(',').map(set => set.match(/(\d+)/g, set));
+  return verses
+    .split(',')
+    .filter(set => !!set)
+    .map(set => set.match(/(\d+)/g, set));
 }
 
 /**
@@ -161,12 +164,12 @@ function queryBuilder(verses) {
 
   // Initialize the GraphQL query
   return `
-    query ($code: String!, $chapter: Int, $book: String) {
-      bible (code: $code) {
+    query ($version: String!, $chapter: Int, $book: String!) {
+      bible (id: $version) {
         name
         direction
         language
-        books (code: $book) {
+        book (id: $book) {
           name
           ${versesQuery}
         }
@@ -176,17 +179,41 @@ function queryBuilder(verses) {
 }
 
 function renderVerses(verses, res) {
-  const root = res.data.bible[0].books[0];
+  const root = res.data.bible.book;
   const verseSets = splitVerses(verses);
 
+  if (!root) return '';
+
   let html = '';
+  let length = 0;
+  const truncate = 20;
   verseSets.forEach((set, idx) => {
     const start = set[0];
-    root[`verses${start}`].forEach(verse => {
-      html += `<span class="verse">${verse.text} <sup>${verse.number}</sup></span> `;
-    });
 
-    if (idx < verseSets.length - 1) html += ' &hellip; ';
+    // If the section exists
+    if (root[`verses${start}`] !== null) {
+      root[`verses${start}`].forEach(verse => {
+        if (length <= truncate) {
+          let text = verse.text;
+          const beforeLength = length;
+          length += text.length;
+
+          // Need to truncate this verse
+          if (length > truncate) {
+            const cut = truncate - beforeLength;
+            text = verse.text.substr(0, cut);
+
+            // Trim if mid-word, need to complete the word
+            text = verse.text.substr(0, Math.min(text.length, text.lastIndexOf(' ')));
+            text += ' &hellip;';
+          }
+
+          html += `<span class="verse"><sup>${verse.number}</sup> ${text}</span> `;
+        }
+      });
+    }
+
+    if (idx < verseSets.length - 1 && length <= truncate) html += ' &hellip; ';
   });
 
   return html;

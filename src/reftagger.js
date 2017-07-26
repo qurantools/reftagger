@@ -130,6 +130,7 @@ class Reftagger {
     style.setAttribute('rel', 'stylesheet');
     style.setAttribute('type', 'text/css');
     style.setAttribute('href', 'https://cdn.alkotob.org/lib/reftagger.min.css');
+    // style.setAttribute('href', '/dist/reftagger.min.css');
     document.getElementsByTagName('head')[0].appendChild(style);
 
     // Append tooltip html
@@ -252,7 +253,7 @@ class Reftagger {
         const bookSettings = self.settings[bookType];
         const queryVars = {
           book,
-          code: bookSettings.version,
+          version: bookSettings.version,
           chapter: parseInt(chapter)
         };
 
