@@ -261,7 +261,7 @@ function renderVerses(verses, res) {
 
   let html = '';
   let length = 0;
-  const truncate = 20;
+  const truncate = 400;
   verseSets.forEach((set, idx) => {
     const start = set[0];
 
