@@ -20,7 +20,14 @@ class Reftagger {
     this._settings = {
       onPageLoad: true,
       iframes: true, // From match.js
-      exclude: [] // From match.js
+      exclude: [], // From match.js
+      theme: 'alkotob', // dark, light, transparent, <custom>
+      quran: {
+        version: 'quran'
+      },
+      bible: {
+        version: 'tm'
+      }
     };
   }
 

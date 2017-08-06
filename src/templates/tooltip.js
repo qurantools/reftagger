@@ -18,7 +18,7 @@ const template = `
       <a target="_blank" href="https://alkotob.org/?utm_source=reftagger">alkotob.org</a>
     </div>
     <div id="alkotob-readmore">
-      <a id="alkotob-readmore-link" target="_blank" href="https://alkotob.org/?utm_source=reftagger">&laquo; اقرأ أكثر</a>
+      <a id="alkotob-readmore-link" target="_blank" href="https://alkotob.org/?utm_source=reftagger">&laquo;</a>
     </div>
   </div>
 `;

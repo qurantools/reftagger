@@ -63,15 +63,13 @@ class Reference {
   }
 
   get permalink() {
-    let url;
-
-    if (this._opts.type === 'quran') {
-      url = `https://alkotob.org/quran/${this.chapter}/${this.verses}`;
-    } else {
-      url = `https://alkotob.org/bible/${this.book}/${this.chapter}/${this.verses}`;
-    }
-
-    return url;
+    return [
+      'https://alkotob.org',
+      this._opts.type.substr(0, 1),
+      this.book,
+      this.chapter,
+      this.verses
+    ].filter(item => !! item).join('/');
   }
 }
 
