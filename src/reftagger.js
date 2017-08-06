@@ -14,21 +14,13 @@ class Reftagger {
   constructor(ctx) {
     this._initialized = false;
     this._tippy = null;
-    this._iterator;
     this._ctx = ctx;
 
     // Initialize the default settings for the class
     this._settings = {
       onPageLoad: true,
       iframes: true, // From match.js
-      exclude: [], // From match.js
-      theme: 'alkotob', // dark, light, transparent, <custom>
-      quran: {
-        version: 'quran'
-      },
-      bible: {
-        version: 'tm'
-      }
+      exclude: [] // From match.js
     };
   }
 
@@ -44,9 +36,9 @@ class Reftagger {
    * @type {DOMIterator}
    * @access protected
    */
-  get iterator() {
+  iterator(ctx) {
     return new DOMIterator(
-      this._ctx || document,
+      ctx || this._ctx || document,
       this.settings.iframes,
       this.settings.exclude
     );
@@ -92,7 +84,7 @@ class Reftagger {
    *
    * @param ctx Actual DOM context to perform updates
    */
-  tag(ctx) { // TODO: implement DOM for ctx
+  tag(ctx) {
     let nodes = this._getTextNodes();
 
     nodes.forEach(node => {
@@ -140,10 +132,10 @@ class Reftagger {
   /**
    * Retrieves the text nodes that will contain references
    */
-  _getTextNodes() {
+  _getTextNodes(ctx) {
     let nodes = [];
 
-    this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+    this.iterator(ctx).forEachNode(NodeFilter.SHOW_TEXT, node => {
       nodes.push(node);
     }, node => {
       if (this._matchesExclude(node.parentNode)) {
@@ -252,10 +244,11 @@ class Reftagger {
 
         const bookSettings = self.settings[bookType];
         const queryVars = {
-          book,
           version: bookSettings.version,
           chapter: parseInt(chapter)
         };
+
+        if (bookType !== 'quran') queryVars.book = book;
 
         fetch(query, queryVars).then(res => {
           if (res.errors) {

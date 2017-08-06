@@ -153,9 +153,7 @@ function queryBuilder(verses) {
     // we will just use a limit: 1
     const limit = end ? `end: ${end}` : `limit: 1`;
     versesQuery += `
-      verses${start}: verses(chapter: $chapter, start: ${start}, ${limit}) {
-        chapter
-        chapterName
+      verses${start}: verses(start: ${start}, ${limit}) {
         number
         text
       }
@@ -164,14 +162,18 @@ function queryBuilder(verses) {
 
   // Initialize the GraphQL query
   return `
-    query ($version: String!, $chapter: Int, $book: String!) {
+    query ($version: String!, $chapter: Int!, $book: String!) {
       bible (id: $version) {
         name
         direction
         language
         book (id: $book) {
           name
-          ${versesQuery}
+          chapter (id: $chapter) {
+            id
+            name
+            ${versesQuery}
+          }
         }
       }
     }
@@ -179,7 +181,7 @@ function queryBuilder(verses) {
 }
 
 function renderVerses(verses, res) {
-  const root = res.data.bible.book;
+  const root = res.data.bible.book.chapter;
   const verseSets = splitVerses(verses);
 
   if (!root) return '';
