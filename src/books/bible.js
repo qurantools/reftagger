@@ -181,8 +181,13 @@ function queryBuilder(verses) {
 }
 
 function renderVerses(verses, res) {
-  const root = res.data.bible.book.chapter;
-  const verseSets = splitVerses(verses);
+  let root, verseSets;
+  try {
+    root = res.data.bible.book.chapter;
+    verseSets = splitVerses(verses);
+  } catch(e) {
+    return false;
+  }
 
   if (!root) return '';
 

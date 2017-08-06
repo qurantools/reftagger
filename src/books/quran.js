@@ -256,8 +256,13 @@ function queryBuilder(verses) {
 }
 
 function renderVerses(verses, res) {
-  const root = res.data.quran.chapter;
-  const verseSets = splitVerses(verses);
+  let root, verseSets;
+  try {
+    root = res.data.quran.chapter;
+    verseSets = splitVerses(verses);
+  } catch(e) {
+    return false;
+  }
 
   if (!root) return '';
 

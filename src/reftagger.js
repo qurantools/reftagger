@@ -4,6 +4,7 @@ import Quran from './books/quran';
 import Bible from './books/bible';
 import tooltipHTML from './templates/tooltip';
 import DOMIterator from './lib/dom-iterator';
+import I18n from './i18n';
 
 const fetch = GraphQLFetch('https://api.alkotob.org/query');
 
@@ -15,9 +16,11 @@ class Reftagger {
     this._initialized = false;
     this._tippy = null;
     this._ctx = ctx;
+    this._i18n = new I18n();
 
     // Initialize the default settings for the class
     this._settings = {
+      language: 'en',
       onPageLoad: true,
       iframes: true, // From match.js
       exclude: [], // From match.js
@@ -78,6 +81,9 @@ class Reftagger {
     if (self.settings.onPageLoad) {
       window.onload = () => self.tag();
     }
+
+    // Update translation settings
+    this._i18n.lang(this._settings.language);
 
     self._initialized = true;
   }
@@ -263,9 +269,11 @@ class Reftagger {
             return;
           }
 
-          const html = bookType === 'quran' ?
+          let html = bookType === 'quran' ?
             Quran.renderVerses(verses, res) :
             Bible.renderVerses(verses, res);
+
+          if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
 
           // Update UI text
           verseText.innerHTML = html;
