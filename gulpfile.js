@@ -230,3 +230,22 @@ gulp.task('watch', watch);
 
 // An alias of test
 gulp.task('default', ['test']);
+
+/**
+ * Semver integration
+ */
+var commitMessage = function (importance) { return "" + importance + " version bump"; };
+
+function inc(importance) {
+  return gulp.src(['./package.json'])
+    .pipe($.bump({ type: importance }))
+    .pipe(gulp.dest('./'))
+    .pipe($.git.commit(commitMessage(importance)))
+    .pipe($.filter('package.json'))
+    .pipe($.tagVersion());
+};
+
+gulp.task('bump:patch', function() { return inc('patch'); });
+gulp.task('bump:minor', function() { return inc('minor'); });
+gulp.task('bump:major', function() { return inc('major'); });
+gulp.task('bump', ['bump:patch']);
