@@ -153,47 +153,6 @@ export default class Bible extends BookBase {
     return results;
   }
 
-  /**
-   * Function for building the query to send to GraphQL
-   */
-  static queryBuilder(verses) {
-    let versesQuery = '';
-
-    Reference.parseVerses(verses).forEach(set => {
-      const start = set[0];
-      const end = set[1];
-
-      // If there is an end verse limit needs to be set, otherwise
-      // we will just use a limit: 1
-      const limit = end ? `end: ${end}` : `limit: 1`;
-      versesQuery += `
-        verses${start}: verses(start: ${start}, ${limit}) {
-          number
-          text
-        }
-      `;
-    });
-
-    // Initialize the GraphQL query
-    return `
-      query ($version: String!, $chapter: Int!, $book: String!) {
-        bible (id: $version) {
-          name
-          direction
-          language
-          book (id: $book) {
-            name
-            chapter (id: $chapter) {
-              id
-              name
-              ${versesQuery}
-            }
-          }
-        }
-      }
-    `;
-  }
-
   _normalize(str) {
     return str.toLowerCase().trim();
   }

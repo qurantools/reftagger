@@ -1,5 +1,6 @@
 import Tippy from 'tippy.js';
 import GraphQLFetch from 'graphql-fetch';
+import BaseBook from './books/base';
 import Quran from './books/quran';
 import Bible from './books/bible';
 import tooltipHTML from './templates/tooltip';
@@ -257,10 +258,7 @@ class Reftagger {
 
         self._tippy.update(this);
 
-        const query = bookType === 'quran' ?
-          Quran.queryBuilder(verses) :
-          Bible.queryBuilder(verses);
-
+        const query = BaseBook.queryBuilder(bookType, verses);
         const version = bookType === 'quran' ?
           self.quran.getVersion(chapter, self.settings.versions) :
           self.bible.getVersion(book, self.settings.versions);

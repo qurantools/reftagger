@@ -42,7 +42,7 @@ describe('Bible', () => {
 
   describe('queryBuilder()', () => {
     it('should return proper GraphQL query', () => {
-      const query = Bible.queryBuilder('1- 3, 5, 8-12');
+      const query = Bible.queryBuilder('bible', '1- 3, 5, 8-12');
       expect(query).to.contain('start: 1, end: 3');
       expect(query).to.contain('start: 5, limit: 1');
       expect(query).to.contain('start: 8, end: 12');

@@ -4,7 +4,7 @@ const translation = {
     readMore: 'Read more'
   },
   ar: {
-    notFound: 'TODO',
+    notFound: 'غير موجود',
     readMore: 'اقرأ أكثر'
   }
 };

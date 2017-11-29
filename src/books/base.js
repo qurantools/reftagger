@@ -1,4 +1,63 @@
+import Reference from '../lib/reference';
+
 export default class BookBase {
+
+  /**
+   * Function for building the query to send to GraphQL
+   */
+  static queryBuilder(type, verses) {
+    let versesQuery = '';
+
+    Reference.parseVerses(verses).forEach(set => {
+      const start = set[0];
+      const end = set[1];
+
+      // If there is an end verse limit needs to be set, otherwise
+      // we will just use a limit: 1
+      const limit = end ? `end: ${end}` : `limit: 1`;
+      versesQuery += `
+        verses${start}: verses(start: ${start}, ${limit}) {
+          number
+          text
+        }
+      `;
+    });
+
+    const bibleQuery = `
+      query ($version: String!, $chapter: Int!, $book: String!) {
+        bible (id: $version) {
+          name
+          direction
+          language
+          book (id: $book) {
+            name
+            chapter (id: $chapter) {
+              id
+              name
+              ${versesQuery}
+            }
+          }
+        }
+      }
+    `;
+
+    const quranQuery = `
+      query ($version: String!, $chapter: Int!) {
+        quran (id: $version) {
+          name
+          direction
+          language
+          chapter (id: $chapter) {
+            id
+            name
+            ${versesQuery}
+          }
+        }
+      }
+    `;
+
+    return type === 'quran' ? quranQuery : bibleQuery;
+  }
 
   /**
    * Function for rendering response for a book
