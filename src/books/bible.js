@@ -1,230 +1,200 @@
 import escape from 'escape-string-regexp';
 import Reference from '../lib/reference';
+import BookBase from './base';
 
-function normalize(str) {
-  return str.toLowerCase().trim();
-}
+// Import translation configurations
+import tma from './bible/tma';
+import injil from './bible/injil';
 
-let books = {
-  'gen': ['Genesis', 'Gen', 'Ge', 'Gn'],
-  'exo': ['Exodus', 'Exo', 'Ex', 'Exod'],
-  'lev': ['Leviticus', 'Lev', 'Le', 'Lv'],
-  'num': ['Numbers', 'Num', 'Nu', 'Nm', 'Nb'],
-  'deu': ['Deuteronomy', 'Deut', 'Dt'],
-  'jos': ['Joshua', 'Josh', 'Jos', 'Jsh'],
-  'jdg': ['Judges', 'Judg', 'Jdg', 'Jg', 'Jdgs'],
-  'rut': ['Ruth', 'Rth', 'Ru'],
-  '1sa': ['1 Samuel', '1 Sam', '1 Sa', '1Samuel', '1S', '1 Sm', '1Sa', '1Sam', '1st Samuel', 'First Samuel'],
-  '2sa': ['2 Samuel', '2 Sam', '2 Sa', '2S', '2 Sm', '2Sa', '2Sam', '2Samuel', '2nd Samuel', 'Second Samuel'],
-  '1ki': ['1 Kings', '1 Kgs', '1 Ki', '1K', '1Kgs', '1Ki', '1Kings', '1st Kgs', '1st Kings', 'First Kings', 'First Kgs', '1Kin'],
-  '2ki': ['2 Kings', '2 Kgs', '2 Ki', '2K', '2Kgs', '2Ki', '2Kings', '2nd Kgs', '2nd Kings', 'Second Kings', 'Second Kgs', '2Kin'],
-  '1ch': ['1 Chronicles', '1 Chron', '1 Ch', '1Ch', '1 Chr', '1Chr', '1Chron', '1Chronicles', '1st Chronicles', 'First Chronicles'],
-  '2ch': ['2 Chronicles', '2 Chron', '2 Ch', '2Ch', '2Chr', '2Chron', '2Chronicles', '2nd Chronicles', 'Second Chronicles'],
-  'ezr': ['Ezra', 'Ezra', 'Ezr'],
-  'neh': ['Nehemiah', 'Neh', 'Ne'],
-  'est': ['Esther', 'Esth', 'Es'],
-  'job': ['Job', 'Job', 'Job', 'Jb'],
-  'psa': ['Psalm', 'Pslm', 'Ps', 'Psalms', 'Psa', 'Psm', 'Pss'],
-  'pro': ['Proverbs', 'Prov', 'Pr', 'Prv'],
-  'ecc': ['Ecclesiastes', 'Eccles', 'Ec', 'Ecc', 'Qoh', 'Qoheleth'],
-  'sol': ['Song of Solomon', 'Song', 'So', 'Canticle of Canticles', 'Canticles', 'Song of Songs', 'SOS'],
-  'isa': ['Isaiah', 'Isa', 'Is'],
-  'jer': ['Jeremiah', 'Jer', 'Je', 'Jr'],
-  'lam': ['Lamentations', 'Lam', 'La'],
-  'eze': ['Ezekiel', 'Ezek', 'Eze', 'Ezk'],
-  'dan': ['Daniel', 'Dan', 'Da', 'Dn'],
-  'hos': ['Hosea', 'Hos', 'Ho'],
-  'joe': ['Joel', 'Joel', 'Joe', 'Jl'],
-  'amo': ['Amos', 'Amos', 'Am'],
-  'oba': ['Obadiah', 'Obad', 'Ob'],
-  'jon': ['Jonah', 'Jnh', 'Jon'],
-  'mic': ['Micah', 'Micah', 'Mic'],
-  'nah': ['Nahum', 'Nah', 'Na'],
-  'hab': ['Habakkuk', 'Hab', 'Hab'],
-  'zep': ['Zephaniah', 'Zeph', 'Zep', 'Zp'],
-  'hag': ['Haggai', 'Haggai', 'Hag', 'Hg'],
-  'zec': ['Zechariah', 'Zech', 'Zec', 'Zc'],
-  'mal': ['Malachi', 'Mal', 'Mal', 'Ml'],
-  'mat': ['Matthew', 'Matt', 'Mt'],
-  'mar': ['Mark', 'Mrk', 'Mk', 'Mr'],
-  'luk': ['Luke', 'Luk', 'Lk'],
-  'joh': ['John', 'John', 'Jn', 'Jhn'],
-  'act': ['Acts', 'Acts', 'Ac'],
-  'rom': ['Romans', 'Rom', 'Ro', 'Rm'],
-  '1co': ['1 Corinthians', '1 Cor', '1 Co', '1Co', '1Cor', '1Corinthians', '1st Corinthians', 'First Corinthians'],
-  '2co': ['2 Corinthians', '2 Cor', '2 Co', '2Co', '2Cor', '2Corinthians', '2nd Corinthians', 'Second Corinthians'],
-  'gal': ['Galatians', 'Gal', 'Ga'],
-  'eph': ['Ephesians', 'Ephes', 'Eph'],
-  'phi': ['Philippians', 'Phil', 'Php'],
-  'col': ['Colossians', 'Col', 'Col'],
-  '1th': ['1 Thessalonians', '1 Thess', '1 Th', '1Th', '1Thes', '1Thess', '1Thessalonians', '1st Thessalonians', 'First Thessalonians'],
-  '2th': ['2 Thessalonians', '2 Thess', '2 Th', '2Th', '2Thes', '2Thess', '2Thessalonians', '2nd Thessalonians', 'Second Thessalonians'],
-  '1ti': ['1 Timothy', '1 Tim', '1 Ti', '1Ti', '1Tim', '1Timothy', '1st Timothy', 'First Timothy'],
-  '2ti': ['2 Timothy', '2 Tim', '2 Ti', '2Ti', '2Tim', '2Timothy', '2nd Timothy', 'Second Timothy'],
-  'tit': ['Titus', 'Titus', 'Tit'],
-  'phm': ['Philemon', 'Philem', 'Phm'],
-  'heb': ['Hebrews', 'Hebrews', 'Heb'],
-  'jam': ['James', 'James', 'Jas', 'Jm'],
-  '1pe': ['1 Peter', '1 Pet', '1 Pe', '1Pe', '1Pet', '1 Pt', '1Pt', '1Peter', '1st Peter', 'First Peter'],
-  '2pe': ['2 Peter', '2 Pet', '2 Pe', '2Pe', '2Pet', '2 Pt', '2Pt', '2Peter', '2nd Peter', 'Second Peter'],
-  '1jo': ['1 John', '1 John', '1 Jn', '1Jn', '1Jo', '1Joh', '1 Jhn', '1Jhn', '1John', '1st John', 'First John'],
-  '2jo': ['2 John', '2 John', '2 Jn', '2Jn', '2Jo', '2Joh', '2 Jhn', '2Jhn', '2John', '2nd John', 'Second John'],
-  '3jo': ['3 John', '3 John', '3 Jn', '3Jn', '3Jo', '3Joh', '3 Jhn', '3Jhn', '3John', '3rd John', 'Third John'],
-  'jud': ['Jude', 'Jude', 'Jud'],
-  'rev': ['Revelation', 'Rev', 'Re', 'The Revelation']
-};
+export default class Bible extends BookBase {
+  constructor() {
+    super();
 
-// Make the array lowercase so its not case-sensitive
-Object.keys(books).forEach(bookId => {
-  books[bookId] = books[bookId].map(book => normalize(book));
-});
+    const self = this;
 
-function getBook(title) {
-  title = normalize(title);
+    // Translations available
+    self.translations = [injil, tma];
 
-  // If they used an actual normalized version, return it
-  if (typeof books[title] !== 'undefined') return title;
+    // Masterlist of books and titles
+    self.books = {
+      'gen': ['genesis', 'gen', 'ge', 'gn'],
+      'exo': ['exodus', 'exo', 'ex', 'exod'],
+      'lev': ['leviticus', 'lev', 'le', 'lv'],
+      'num': ['numbers', 'num', 'nu', 'nm', 'nb'],
+      'deu': ['deuteronomy', 'deut', 'dt'],
+      'jos': ['joshua', 'josh', 'jos', 'jsh'],
+      'jdg': ['judges', 'judg', 'jdg', 'jg', 'jdgs'],
+      'rut': ['ruth', 'rth', 'ru'],
+      '1sa': ['1 samuel', '1 sam', '1 sa', '1samuel', '1s', '1 sm', '1sa', '1sam', '1st samuel', 'first samuel'],
+      '2sa': ['2 samuel', '2 sam', '2 sa', '2s', '2 sm', '2sa', '2sam', '2samuel', '2nd samuel', 'second samuel'],
+      '1ki': ['1 kings', '1 kgs', '1 ki', '1k', '1kgs', '1ki', '1kings', '1st kgs', '1st kings', 'first kings', 'first kgs', '1kin'],
+      '2ki': ['2 kings', '2 kgs', '2 ki', '2k', '2kgs', '2ki', '2kings', '2nd kgs', '2nd kings', 'second kings', 'second kgs', '2kin'],
+      '1ch': ['1 chronicles', '1 chron', '1 ch', '1ch', '1 chr', '1chr', '1chron', '1chronicles', '1st chronicles', 'first chronicles'],
+      '2ch': ['2 chronicles', '2 chron', '2 ch', '2ch', '2chr', '2chron', '2chronicles', '2nd chronicles', 'second chronicles'],
+      'ezr': ['ezra', 'ezra', 'ezr'],
+      'neh': ['nehemiah', 'neh', 'ne'],
+      'est': ['esther', 'esth', 'es'],
+      'job': ['job', 'job', 'job', 'jb'],
+      'psa': ['psalm', 'pslm', 'ps', 'psalms', 'psa', 'psm', 'pss'],
+      'pro': ['proverbs', 'prov', 'pr', 'prv'],
+      'ecc': ['ecclesiastes', 'eccles', 'ec', 'ecc', 'qoh', 'qoheleth'],
+      'sol': ['song of solomon', 'song', 'so', 'canticle of canticles', 'canticles', 'song of songs', 'sos'],
+      'isa': ['isaiah', 'isa', 'is'],
+      'jer': ['jeremiah', 'jer', 'je', 'jr'],
+      'lam': ['lamentations', 'lam', 'la'],
+      'eze': ['ezekiel', 'ezek', 'eze', 'ezk'],
+      'dan': ['daniel', 'dan', 'da', 'dn'],
+      'hos': ['hosea', 'hos', 'ho'],
+      'joe': ['joel', 'joel', 'joe', 'jl'],
+      'amo': ['amos', 'amos', 'am'],
+      'oba': ['obadiah', 'obad', 'ob'],
+      'jon': ['jonah', 'jnh', 'jon'],
+      'mic': ['micah', 'micah', 'mic'],
+      'nah': ['nahum', 'nah', 'na'],
+      'hab': ['habakkuk', 'hab', 'hab'],
+      'zep': ['zephaniah', 'zeph', 'zep', 'zp'],
+      'hag': ['haggai', 'haggai', 'hag', 'hg'],
+      'zec': ['zechariah', 'zech', 'zec', 'zc'],
+      'mal': ['malachi', 'mal', 'mal', 'ml'],
+      'mat': ['matthew', 'matt', 'mt'],
+      'mar': ['mark', 'mrk', 'mk', 'mr'],
+      'luk': ['luke', 'luk', 'lk'],
+      'joh': ['john', 'john', 'jn', 'jhn'],
+      'act': ['acts', 'acts', 'ac'],
+      'rom': ['romans', 'rom', 'ro', 'rm'],
+      '1co': ['1 corinthians', '1 cor', '1 co', '1co', '1cor', '1corinthians', '1st corinthians', 'first corinthians'],
+      '2co': ['2 corinthians', '2 cor', '2 co', '2co', '2cor', '2corinthians', '2nd corinthians', 'second corinthians'],
+      'gal': ['galatians', 'gal', 'ga'],
+      'eph': ['ephesians', 'ephes', 'eph'],
+      'phi': ['philippians', 'phil', 'php'],
+      'col': ['colossians', 'col', 'col'],
+      '1th': ['1 thessalonians', '1 thess', '1 th', '1th', '1thes', '1thess', '1thessalonians', '1st thessalonians', 'first thessalonians'],
+      '2th': ['2 thessalonians', '2 thess', '2 th', '2th', '2thes', '2thess', '2thessalonians', '2nd thessalonians', 'second thessalonians'],
+      '1ti': ['1 timothy', '1 tim', '1 ti', '1ti', '1tim', '1timothy', '1st timothy', 'first timothy'],
+      '2ti': ['2 timothy', '2 tim', '2 ti', '2ti', '2tim', '2timothy', '2nd timothy', 'second timothy'],
+      'tit': ['titus', 'titus', 'tit'],
+      'phm': ['philemon', 'philem', 'phm'],
+      'heb': ['hebrews', 'hebrews', 'heb'],
+      'jam': ['james', 'james', 'jas', 'jm'],
+      '1pe': ['1 peter', '1 pet', '1 pe', '1pe', '1pet', '1 pt', '1pt', '1peter', '1st peter', 'first peter'],
+      '2pe': ['2 peter', '2 pet', '2 pe', '2pe', '2pet', '2 pt', '2pt', '2peter', '2nd peter', 'second peter'],
+      '1jo': ['1 john', '1 john', '1 jn', '1jn', '1jo', '1joh', '1 jhn', '1jhn', '1john', '1st john', 'first john'],
+      '2jo': ['2 john', '2 john', '2 jn', '2jn', '2jo', '2joh', '2 jhn', '2jhn', '2john', '2nd john', 'second john'],
+      '3jo': ['3 john', '3 john', '3 jn', '3jn', '3jo', '3joh', '3 jhn', '3jhn', '3john', '3rd john', 'third john'],
+      'jud': ['jude', 'jude', 'jud'],
+      'rev': ['revelation', 'rev', 're', 'the revelation']
+    };
 
-  // Look through titles for proper format
-  for (let bookId of Object.keys(books)) {
-    if (books[bookId].indexOf(title) !== -1) {
-      return bookId;
-    }
+    // Append translation configurations to masterlist
+    self.translations.forEach(translation => {
+      Object.keys(translation.books).forEach((bookId) => {
+        self.books[bookId].push(...translation.books[bookId]);
+      });
+    });
+
+    // Create a regex once for use later when tagging
+    let bookList = Object.keys(self.books).map(k => self.books[k]);
+    self.booksRegexp = Array.prototype.concat(...bookList)
+      .map(e => escape(e))
+      .join('|');
+
+    // Get the masterlist codes to use for associations
+    self.bookCodes = Object.keys(self.books);
   }
-
-  return false;
-}
-
-function parse(input) {
-  let results = [];
-  let pattern;
-  let regex;
-  let match;
 
   /**
-   * <en|ar book> 10: 12-13,4
-   * <en|ar book> 139: 12-13,4
+   * Loading a book key from the references
    */
-  let bookList = [];
-  Object.keys(books).forEach(bookId => bookList.push(...books[bookId]));
-  bookList = bookList.join('|');
+  getBook(reference) {
+    const self = this;
 
-  pattern = `(${bookList})\\s*`;
-  pattern += '([\\d]{1,3})\\s*:?\\s*';
-  pattern += '([\\d\\s\\-,]+)?';
+    reference = self._normalize(reference);
 
-  regex = new RegExp(pattern, 'gi');
-  while (match = regex.exec(input)) {
-    let ref = new Reference();
+    // If they used an actual normalized version, return it
+    if (self.bookCodes.indexOf(reference) !== -1) return reference;
 
-    ref.order = match.index;
-    ref.text = match[0];
-    ref.type = 'bible';
-    ref.book = getBook(match[1]);
-    ref.chapter = match[2];
-    ref.verses = match[3];
+    // Look through references to get associated code
+    for (let bookId of self.bookCodes) {
+      if (self.books[bookId].indexOf(reference) !== -1) {
+        return bookId;
+      }
+    }
 
-    results.push(ref);
+    return null;
   }
 
-  return results;
-};
+  parse(input) {
+    const self    = this;
+    const results = [];
+    let match;
 
-/**
- * Splitting the verses up for set parsing
- */
-function splitVerses(verses) {
-  return verses
-    .split(',')
-    .filter(set => !!set)
-    .map(set => set.match(/(\d+)/g, set));
-}
+    /**
+     * <en|ar book> 10: 12-13,4
+     * <en|ar book> 139: 12-13,4
+     */
+    let pattern = `(${self.booksRegexp})\\s*`;
+    pattern += '([\\d]{1,3})\\s*:?\\s*';
+    pattern += '([\\d\\s\\-,]+)?';
 
-/**
- * Function for building the query to send to GraphQL
- */
-function queryBuilder(verses) {
-  let versesQuery = '';
-  splitVerses(verses).forEach(set => {
-    const start = set[0];
-    const end = set[1];
+    let regex = new RegExp(pattern, 'gi');
+    while (match = regex.exec(input)) {
+      let ref = new Reference();
 
-    // If there is an end verse limit needs to be set, otherwise
-    // we will just use a limit: 1
-    const limit = end ? `end: ${end}` : `limit: 1`;
-    versesQuery += `
-      verses${start}: verses(start: ${start}, ${limit}) {
-        number
-        text
+      ref.order   = match.index;
+      ref.text    = match[0];
+      ref.type    = 'bible';
+      ref.book    = self.getBook(match[1]);
+      ref.chapter = match[2];
+      ref.verses  = match[3];
+
+      results.push(ref);
+    }
+
+    return results;
+  }
+
+  /**
+   * Function for building the query to send to GraphQL
+   */
+  static queryBuilder(verses) {
+    let versesQuery = '';
+
+    Reference.parseVerses(verses).forEach(set => {
+      const start = set[0];
+      const end = set[1];
+
+      // If there is an end verse limit needs to be set, otherwise
+      // we will just use a limit: 1
+      const limit = end ? `end: ${end}` : `limit: 1`;
+      versesQuery += `
+        verses${start}: verses(start: ${start}, ${limit}) {
+          number
+          text
+        }
+      `;
+    });
+
+    // Initialize the GraphQL query
+    return `
+      query ($version: String!, $chapter: Int!, $book: String!) {
+        bible (id: $version) {
+          name
+          direction
+          language
+          book (id: $book) {
+            name
+            chapter (id: $chapter) {
+              id
+              name
+              ${versesQuery}
+            }
+          }
+        }
       }
     `;
-  });
-
-  // Initialize the GraphQL query
-  return `
-    query ($version: String!, $chapter: Int!, $book: String!) {
-      bible (id: $version) {
-        name
-        direction
-        language
-        book (id: $book) {
-          name
-          chapter (id: $chapter) {
-            id
-            name
-            ${versesQuery}
-          }
-        }
-      }
-    }
-  `;
-}
-
-function renderVerses(verses, res) {
-  let root, verseSets;
-  try {
-    root = res.data.bible.book.chapter;
-    verseSets = splitVerses(verses);
-  } catch(e) {
-    return false;
   }
 
-  if (!root) return '';
-
-  let html = '';
-  let length = 0;
-  const truncate = 400;
-  verseSets.forEach((set, idx) => {
-    const start = set[0];
-
-    // If the section exists
-    if (root[`verses${start}`] !== null) {
-      root[`verses${start}`].forEach(verse => {
-        if (length <= truncate) {
-          let text = verse.text;
-          const beforeLength = length;
-          length += text.length;
-
-          // Need to truncate this verse
-          if (length > truncate) {
-            const cut = truncate - beforeLength;
-            text = verse.text.substr(0, cut);
-
-            // Trim if mid-word, need to complete the word
-            text = verse.text.substr(0, Math.min(text.length, text.lastIndexOf(' ')));
-            text += ' &hellip;';
-          }
-
-          html += `<span class="verse"><sup>${verse.number}</sup> ${text}</span> `;
-        }
-      });
-    }
-
-    if (idx < verseSets.length - 1 && length <= truncate) html += ' &hellip; ';
-  });
-
-  return html;
+  _normalize(str) {
+    return str.toLowerCase().trim();
+  }
 }
-
-export default { parse, getBook, queryBuilder, renderVerses };
-export { getBook, parse, queryBuilder, renderVerses };

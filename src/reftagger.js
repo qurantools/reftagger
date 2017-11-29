@@ -5,8 +5,9 @@ import Bible from './books/bible';
 import tooltipHTML from './templates/tooltip';
 import DOMIterator from './lib/dom-iterator';
 import I18n from './i18n';
+import _get from 'lodash.get';
 
-const fetch = GraphQLFetch('https://api.alkotob.org/query');
+const fetch = GraphQLFetch('https://alkotob.org/query');
 
 /**
  * The main entry point for the reftagger of Alkotob
@@ -14,9 +15,11 @@ const fetch = GraphQLFetch('https://api.alkotob.org/query');
 class Reftagger {
   constructor(ctx) {
     this._initialized = false;
-    this._tippy = null;
-    this._ctx = ctx;
-    this._i18n = new I18n();
+    this._tippy       = null;
+    this._ctx         = ctx;
+    this._i18n        = new I18n();
+    this.bible        = new Bible;
+    this.quran        = new Quran;
 
     // Initialize the default settings for the class
     this._settings = {
@@ -25,12 +28,7 @@ class Reftagger {
       iframes: true, // From match.js
       exclude: [], // From match.js
       theme: 'alkotob', // dark, light, transparent, <custom>
-      quran: {
-        version: 'quran'
-      },
-      bible: {
-        version: 'tm'
-      }
+      versions: ['quran', 'injil', 'tma'] // specify the version hierarchy
     };
   }
 
@@ -98,14 +96,15 @@ class Reftagger {
    * @param ctx Actual DOM context to perform updates
    */
   tag(ctx) {
+    const self = this;
     let nodes = this._getTextNodes();
 
     nodes.forEach(node => {
       let references = [];
 
       // Parse out all the references
-      references.push(...Quran.parse(node.textContent));
-      references.push(...Bible.parse(node.textContent));
+      references.push(...self.quran.parse(node.textContent));
+      references.push(...self.bible.parse(node.textContent));
 
       references
         .sort((a, b) => b.order - a.order) // Sort in reverse order
@@ -171,10 +170,15 @@ class Reftagger {
     const startIdx = node.textContent.indexOf(ref.text);
     if (startIdx === -1) return;
 
+    const version = ref.type === 'quran' ?
+      this.quran.getVersion(ref.chapter, this.settings.versions) :
+      this.bible.getVersion(ref.book, this.settings.versions);
+
     const startNode = node.splitText(startIdx);
+    const permalink = ref.permalink(version);
 
     let refEl = document.createElement('a');
-    refEl.setAttribute('href', ref.permalink);
+    refEl.setAttribute('href', permalink);
     refEl.setAttribute('target', '_blank');
     refEl.setAttribute('class', 'alkotob-ayah');
     refEl.setAttribute('data-text', ref.text);
@@ -182,7 +186,7 @@ class Reftagger {
     refEl.setAttribute('data-book', ref.book);
     refEl.setAttribute('data-chapter', ref.chapter);
     refEl.setAttribute('data-verses', ref.verses);
-    refEl.setAttribute('data-permalink', ref.permalink);
+    refEl.setAttribute('data-permalink', permalink);
     refEl.textContent = ref.text;
 
     // Get rid of actual text in following node
@@ -230,19 +234,21 @@ class Reftagger {
         if (self._tippy.loading) return;
         self._tippy.loading = true;
 
-        const el = self._tippy.getReferenceElement(this);
+        const el        = self._tippy.getReferenceElement(this);
         const matchText = el.getAttribute('data-text');
-        const bookType = el.getAttribute('data-type');
-        const book = el.getAttribute('data-book');
-        const chapter = el.getAttribute('data-chapter');
-        const verses = el.getAttribute('data-verses');
+        const bookType  = el.getAttribute('data-type');
+        const book      = el.getAttribute('data-book');
+        const chapter   = el.getAttribute('data-chapter');
+        const verses    = el.getAttribute('data-verses');
         const permalink = el.getAttribute('data-permalink');
 
         // Update the social media buttons
         const fb = document.getElementById('alkotob-social-fb');
         fb.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(permalink)}`);
+
         const tw = document.getElementById('alkotob-social-tw');
         tw.setAttribute('href', `https://twitter.com/intent/tweet?url=${encodeURIComponent(permalink)}`);
+
         const read = document.getElementById('alkotob-readmore-link');
         read.setAttribute('href', permalink);
 
@@ -255,9 +261,12 @@ class Reftagger {
           Quran.queryBuilder(verses) :
           Bible.queryBuilder(verses);
 
-        const bookSettings = self.settings[bookType];
+        const version = bookType === 'quran' ?
+          self.quran.getVersion(chapter, self.settings.versions) :
+          self.bible.getVersion(book, self.settings.versions);
+
         const queryVars = {
-          version: bookSettings.version,
+          version,
           chapter: parseInt(chapter)
         };
 
@@ -270,8 +279,8 @@ class Reftagger {
           }
 
           let html = bookType === 'quran' ?
-            Quran.renderVerses(verses, res) :
-            Bible.renderVerses(verses, res);
+            Quran.render(_get(res, 'data.quran.chapter')) :
+            Bible.render(_get(res, 'data.bible.book.chapter'));
 
           if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
 

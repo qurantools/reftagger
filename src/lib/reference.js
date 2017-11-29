@@ -62,14 +62,25 @@ class Reference {
     return this._opts.verses;
   }
 
-  get permalink() {
+  /**
+   * Creates an array of verses and beginning end sets (start and end index)
+   * Example: [[1, 3], [6]]
+   */
+  static parseVerses(verseStr) {
+    return verseStr
+      .replace(/\s/g, '')
+      .replace(/[^\-\d,]/g, '')
+      .split(',')
+      .filter(set => !!set)
+      .map(set => set.match(/(\d+)/g, set));
+  }
+
+  permalink(version) {
     return [
       'https://alkotob.org',
-      this._opts.type.substr(0, 1),
-      this.book,
-      this.chapter,
-      this.verses
-    ].filter(item => !! item).join('/');
+      version,
+      [this.book, this.chapter, this.verses].filter(item => !! item).join('.'),
+    ].join('/') + '?ref=reftagger';
   }
 }
 

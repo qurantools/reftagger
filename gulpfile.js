@@ -1,15 +1,15 @@
-const gulp = require('gulp');
-const loadPlugins = require('gulp-load-plugins');
-const del = require('del');
-const glob = require('glob');
-const path = require('path');
-const isparta = require('isparta');
-const webpack = require('webpack');
+const gulp          = require('gulp');
+const loadPlugins   = require('gulp-load-plugins');
+const del           = require('del');
+const glob          = require('glob');
+const path          = require('path');
+const isparta       = require('isparta');
+const webpack       = require('webpack');
 const webpackStream = require('webpack-stream');
 
 const Instrumenter = isparta.Instrumenter;
 const mochaGlobals = require('./test/setup/.globals');
-const manifest = require('./package.json');
+const manifest     = require('./package.json');
 
 const banner = `/*!
  * ${manifest.name} v${manifest.version}
@@ -24,10 +24,10 @@ const banner = `/*!
 const $ = loadPlugins();
 
 // Gather the library data from `package.json`
-const config = manifest.babelBoilerplateOptions;
-const mainFile = manifest.main;
+const config            = manifest.babelBoilerplateOptions;
+const mainFile          = manifest.main;
 const destinationFolder = path.dirname(mainFile);
-const exportFileName = path.basename(mainFile, path.extname(mainFile));
+const exportFileName    = path.basename(mainFile, path.extname(mainFile));
 
 function cleanDist(done) {
   del([destinationFolder]).then(() => done());
@@ -75,9 +75,15 @@ function build() {
       externals: {},
       module: {
         loaders: [
-          { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: 'babel-loader',
+          }
         ]
-      }
+      },
+      plugins: [
+      ],
     }))
     .pipe($.banner(banner))
     .pipe(gulp.dest(destinationFolder))
@@ -162,7 +168,11 @@ function testBrowser() {
       module: {
         loaders: [
           // This is what allows us to author in future JavaScript
-          { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: 'babel-loader'
+          },
           // This allows the test setup scripts to load `package.json`
           { test: /\.json$/, exclude: /node_modules/, loader: 'json-loader' }
         ]

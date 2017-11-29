@@ -1,305 +1,277 @@
 import escape from 'escape-string-regexp';
 import Reference from '../lib/reference';
+import BookBase from './base';
 
-function normalize(str) {
-  return str.toLowerCase().trim();
-}
+// Import translation configurations
+import original from './quran/quran';
 
-let chapters = [
-  ["Al-Fatihah", "The Opener", "الفاتحة"],
-  ["Al-Baqarah", "The Cow", "البقرة"],
-  ["Ali 'Imran", "Family of Imran", "آل عمران"],
-  ["An-Nisa", "The Women", "النساء"],
-  ["Al-Ma'idah", "The Table Spread", "المائدة"],
-  ["Al-An'am", "The Cattle", "الأنعام"],
-  ["Al-A'raf", "The Heights", "الأعراف"],
-  ["Al-Anfal", "The Spoils of War", "الأنفال"],
-  ["At-Tawbah", "The Repentance", "التوبة"],
-  ["Yunus", "Jonah", "يونس"],
-  ["Hud", "Hud", "هود"],
-  ["Yusuf", "Joseph", "يوسف"],
-  ["Ar-Ra'd", "The Thunder", "الرّعد"],
-  ["Ibrahim", "Abrahim", "إبراهيم"],
-  ["Al-Hijr", "The Rocky Tract", "الحجر"],
-  ["An-Nahl", "The Bee", "النحل"],
-  ["Al-Isra", "The Night Journey", "الإسراء"],
-  ["Al-Kahf", "The Cave", "الكهف"],
-  ["Maryam", "Mary", "مريم"],
-  ["Taha", "Ta-Ha", "طه"],
-  ["Al-Anbya", "The Prophets", "الأنبياء"],
-  ["Al-Haj", "The Pilgrimage", "الحج"],
-  ["Al-Mu'minun", "The Believers", "المؤمنون"],
-  ["An-Nur", "The Light", "النّور"],
-  ["Al-Furqan", "The Criterian", "الفرقان"],
-  ["Ash-Shu'ara", "The Poets", "الشعراء"],
-  ["An-Naml", "The Ant", "النمل"],
-  ["Al-Qasas", "The Stories", "القصص"],
-  ["Al-'Ankabut", "The Spider", "العنكبوت"],
-  ["Ar-Rum", "The Romans", "الروم"],
-  ["Luqman", "Luqman", "لقمان"],
-  ["As-Sajdah", "The Prostration", "السجدة"],
-  ["Al-Ahzab", "The Combined Forces", "الأحزاب"],
-  ["Saba", "Sheba", "سبإ"],
-  ["Fatir", "Originator", "فاطر"],
-  ["Ya-Sin", "Ya Sin", "يس"],
-  ["As-Saffat", "Those who set the Ranks", "الصّافّات"],
-  ["Sad", "The Letter \"Saad\"", "ص"],
-  ["Az-Zumar", "The Troops", "الزمر"],
-  ["Ghafir", "The Forgiver", "غافر"],
-  ["Fussilat", "Explained in Detail", "فصّلت"],
-  ["Ash-Shuraa", "The Consultation", "الشورى"],
-  ["Az-Zukhruf", "The Ornaments of Gold", "الزخرف"],
-  ["Ad-Dukhan", "The Smoke", "الدخان"],
-  ["Al-Jathiyah", "The Crouching", "الجاثية"],
-  ["Al-Ahqaf", "The Wind-Curved Sandhills", "الأحقاف"],
-  ["Muhammad", "Muhammad", "محمّـد"],
-  ["Al-Fath", "The Victory", "الفتح"],
-  ["Al-Hujurat", "The Rooms", "الحُـجُـرات"],
-  ["Qaf", "The Letter \"Qaf\"", "ق"],
-  ["Adh-Dhariyat", "The Winnowing Winds", "الذاريات"],
-  ["At-Tur", "The Mount", "الـطور"],
-  ["An-Najm", "The Star", "الـنحـم"],
-  ["Al-Qamar", "The Moon", "الـقمـر"],
-  ["Ar-Rahman", "The Beneficent", "الـرحـمـن"],
-  ["Al-Waqi'ah", "The Inevitable", "الواقيـة"],
-  ["Al-Hadid", "The Iron", "الحـديد"],
-  ["Al-Mujadila", "The Pleading Woman", "الـمجادلـة"],
-  ["Al-Hashr", "The Exile", "الـحـشـر"],
-  ["Al-Mumtahanah", "She that is to be examined", "الـمـمـتـحنة"],
-  ["As-Saf", "The Ranks", "الـصّـف"],
-  ["Al-Jumu'ah", "The Congregation, Friday", "الـجـمـعـة"],
-  ["Al-Munafiqun", "The Hypocrites", "الـمنافقون"],
-  ["At-Taghabun", "The Mutual Disillusion", "الـتغابن"],
-  ["At-Talaq", "The Divorce", "الـطلاق"],
-  ["At-Tahrim", "The Prohibtiion", "الـتحريم"],
-  ["Al-Mulk", "The Sovereignty", "الـملك"],
-  ["Al-Qalam", "The Pen", "الـقـلـم"],
-  ["Al-Haqqah", "The Reality", "الـحاقّـة"],
-  ["Al-Ma'arij", "The Ascending Stairways", "الـمعارج"],
-  ["Nuh", "Noah", "نوح"],
-  ["Al-Jinn", "The Jinn", "الجن"],
-  ["Al-Muzzammil", "The Enshrouded One", "الـمـزّمّـل"],
-  ["Al-Muddaththir", "The Cloaked One", "الـمّـدّثّـر"],
-  ["Al-Qiyamah", "The Resurrection", "الـقـيامـة"],
-  ["Al-Insan", "The Man", "الإنسان"],
-  ["Al-Mursalat", "The Emissaries", "الـمرسلات"],
-  ["An-Naba", "The Tidings", "الـنبإ"],
-  ["An-Nazi'at", "Those who drag forth", "الـنازعات"],
-  ["'Abasa", "He Frowned", "عبس"],
-  ["At-Takwir", "The Overthrowing", "التكوير"],
-  ["Al-Infitar", "The Cleaving", "الانفطار"],
-  ["Al-Mutaffifin", "The Defrauding", "المطـفـفين"],
-  ["Al-Inshiqaq", "The Sundering", "الانشقاق"],
-  ["Al-Buruj", "The Mansions of the Stars", "البروج"],
-  ["At-Tariq", "The Nightcommer", "الـطارق"],
-  ["Al-A'la", "The Most High", "الأعـلى"],
-  ["Al-Ghashiyah", "The Overwhelming", "الغاشـيـة"],
-  ["Al-Fajr", "The Dawn", "الفجر"],
-  ["Al-Balad", "The City", "الـبلد"],
-  ["Ash-Shams", "The Sun", "الـشـمـس"],
-  ["Al-Layl", "The Night", "اللـيـل"],
-  ["Ad-Duhaa", "The Morning Hours", "الضـحى"],
-  ["Ash-Sharh", "The Relief", "الـشرح"],
-  ["At-Tin", "The Fig", "الـتين"],
-  ["Al-'Alaq", "The Clot", "الـعلق"],
-  ["Al-Qadr", "The Power", "الـقدر"],
-  ["Al-Bayyinah", "The Clear Proof", "الـبينة"],
-  ["Az-Zalzalah", "The Earthquake", "الـزلزلة"],
-  ["Al-'Adiyat", "The Courser", "الـعاديات"],
-  ["Al-Qari'ah", "The Calamity", "الـقارعـة"],
-  ["At-Takathur", "The Rivalry in world increase", "الـتكاثر"],
-  ["Al-'Asr", "The Declining Day", "الـعصر"],
-  ["Al-Humazah", "The Traducer", "الـهمزة"],
-  ["Al-Fil", "The Elephant", "الـفيل"],
-  ["Quraysh", "Quraysh", "قريش"],
-  ["Al-Ma'un", "The Small Kindesses", "المـاعون"],
-  ["Al-Kawthar", "The Abundance", "الـكوثر"],
-  ["Al-Kafirun", "The Disbelievers", "الـكافرون"],
-  ["An-Nasr", "The Divine Support", "الـنصر"],
-  ["Al-Masad", "The Palm Fiber", "الـمسد"],
-  ["Al-Ikhlas", "The Sincerity", "الإخلاص"],
-  ["Al-Falaq", "The Daybreak", "الـفلق"],
-  ["An-Nas", "The Mankind", "الـناس"],
-];
+export default class Quran extends BookBase {
+  constructor() {
+    super();
 
-// Make the array lowercase so its not case-sensitive
-chapters = chapters.map(list => list.map(book => normalize(book)));
+    const self = this;
 
-function getChapter(chapter) {
-  const c = parseInt(chapter);
-  chapter = normalize(chapter);
+    // Translations available
+    self.translations = [original];
 
-  // Chapter is already a number
-  if (!isNaN(c)) return c;
+    // Masterlist of chapters and titles
+    self.chapters = [
+      ["al-fatihah", "the opener"],
+      ["al-baqarah", "the cow"],
+      ["ali 'imran", "family of imran"],
+      ["an-nisa", "the women"],
+      ["al-ma'idah", "the table spread"],
+      ["al-an'am", "the cattle"],
+      ["al-a'raf", "the heights"],
+      ["al-anfal", "the spoils of war"],
+      ["at-tawbah", "the repentance"],
+      ["yunus", "jonah"],
+      ["hud", "hud"],
+      ["yusuf", "joseph"],
+      ["ar-ra'd", "the thunder"],
+      ["ibrahim", "abrahim"],
+      ["al-hijr", "the rocky tract"],
+      ["an-nahl", "the bee"],
+      ["al-isra", "the night journey"],
+      ["al-kahf", "the cave"],
+      ["maryam", "mary"],
+      ["taha", "ta-ha"],
+      ["al-anbya", "the prophets"],
+      ["al-haj", "the pilgrimage"],
+      ["al-mu'minun", "the believers"],
+      ["an-nur", "the light"],
+      ["al-furqan", "the criterian"],
+      ["ash-shu'ara", "the poets"],
+      ["an-naml", "the ant"],
+      ["al-qasas", "the stories"],
+      ["al-'ankabut", "the spider"],
+      ["ar-rum", "the romans"],
+      ["luqman", "luqman"],
+      ["as-sajdah", "the prostration"],
+      ["al-ahzab", "the combined forces"],
+      ["saba", "sheba"],
+      ["fatir", "originator"],
+      ["ya-sin", "ya sin"],
+      ["as-saffat", "those who set the ranks"],
+      ["sad", "the letter \"saad\""],
+      ["az-zumar", "the troops"],
+      ["ghafir", "the forgiver"],
+      ["fussilat", "explained in detail"],
+      ["ash-shuraa", "the consultation"],
+      ["az-zukhruf", "the ornaments of gold"],
+      ["ad-dukhan", "the smoke"],
+      ["al-jathiyah", "the crouching"],
+      ["al-ahqaf", "the wind-curved sandhills"],
+      ["muhammad", "muhammad"],
+      ["al-fath", "the victory"],
+      ["al-hujurat", "the rooms"],
+      ["qaf", "the letter \"qaf\""],
+      ["adh-dhariyat", "the winnowing winds"],
+      ["at-tur", "the mount"],
+      ["an-najm", "the star"],
+      ["al-qamar", "the moon"],
+      ["ar-rahman", "the beneficent"],
+      ["al-waqi'ah", "the inevitable"],
+      ["al-hadid", "the iron"],
+      ["al-mujadila", "the pleading woman"],
+      ["al-hashr", "the exile"],
+      ["al-mumtahanah", "she that is to be examined"],
+      ["as-saf", "the ranks"],
+      ["al-jumu'ah", "the congregation, friday"],
+      ["al-munafiqun", "the hypocrites"],
+      ["at-taghabun", "the mutual disillusion"],
+      ["at-talaq", "the divorce"],
+      ["at-tahrim", "the prohibtiion"],
+      ["al-mulk", "the sovereignty"],
+      ["al-qalam", "the pen"],
+      ["al-haqqah", "the reality"],
+      ["al-ma'arij", "the ascending stairways"],
+      ["nuh", "noah"],
+      ["al-jinn", "the jinn"],
+      ["al-muzzammil", "the enshrouded one"],
+      ["al-muddaththir", "the cloaked one"],
+      ["al-qiyamah", "the resurrection"],
+      ["al-insan", "the man"],
+      ["al-mursalat", "the emissaries"],
+      ["an-naba", "the tidings"],
+      ["an-nazi'at", "those who drag forth"],
+      ["'abasa", "he frowned"],
+      ["at-takwir", "the overthrowing"],
+      ["al-infitar", "the cleaving"],
+      ["al-mutaffifin", "the defrauding"],
+      ["al-inshiqaq", "the sundering"],
+      ["al-buruj", "the mansions of the stars"],
+      ["at-tariq", "the nightcommer"],
+      ["al-a'la", "the most high"],
+      ["al-ghashiyah", "the overwhelming"],
+      ["al-fajr", "the dawn"],
+      ["al-balad", "the city"],
+      ["ash-shams", "the sun"],
+      ["al-layl", "the night"],
+      ["ad-duhaa", "the morning hours"],
+      ["ash-sharh", "the relief"],
+      ["at-tin", "the fig"],
+      ["al-'alaq", "the clot"],
+      ["al-qadr", "the power"],
+      ["al-bayyinah", "the clear proof"],
+      ["az-zalzalah", "the earthquake"],
+      ["al-'adiyat", "the courser"],
+      ["al-qari'ah", "the calamity"],
+      ["at-takathur", "the rivalry in world increase"],
+      ["al-'asr", "the declining day"],
+      ["al-humazah", "the traducer"],
+      ["al-fil", "the elephant"],
+      ["quraysh", "quraysh"],
+      ["al-ma'un", "the small kindesses"],
+      ["al-kawthar", "the abundance"],
+      ["al-kafirun", "the disbelievers"],
+      ["an-nasr", "the divine support"],
+      ["al-masad", "the palm fiber"],
+      ["al-ikhlas", "the sincerity"],
+      ["al-falaq", "the daybreak"],
+      ["an-nas", "the mankind"],
+    ];
 
-  let bookIndex = -1;
+    // Append translation configurations to masterlist
+    self.translations.forEach(translation => {
+      translation.chapters.forEach((names, idx) => {
+        self.chapters[idx].push(...translation.chapters[idx]);
+      });
+    });
 
-  // Attempt to find it in the array
-  chapters.forEach((b, idx) => {
-    if (b.indexOf(chapter) !== -1) {
-      // Do +1 as array starts at zero
-      bookIndex = idx + 1;
-      return;
+    // Create a regex once for use later when tagging
+    self.chaptersRegexp = Array.prototype.concat(...self.chapters)
+      .map(e => escape(e))
+      .join('|');
+
+    // Get the masterlist codes to use for associations
+    self.chapterIds = Object.keys(self.chapters);
+  }
+
+  /**
+   * Loading a book key from the references
+   */
+  getChapter(reference) {
+    const self = this;
+
+    let c = parseInt(reference);
+    reference = self._normalize(reference);
+
+    // Chapter is already a number
+    if (!isNaN(c)) return c;
+    else c--;
+
+    let chapterIdx;
+
+    // Attempt to find it in the array
+    self.chapters.forEach((b, idx) => {
+      if (b.indexOf(reference) !== -1) {
+        // Do +1 as array starts at zero
+        chapterIdx = idx + 1;
+        return;
+      }
+    });
+
+    return chapterIdx;
+  }
+
+  parse(input) {
+    const self    = this;
+    const results = [];
+    let pattern;
+    let match;
+    let regex;
+
+    /**
+     * Q 1:123
+     * Q 11: 123
+     * Q111:123
+     * Quran111:123
+     * Quran 1:123
+     * Koran 1:111
+     * Qur'an 1:111
+     */
+    pattern = '(?:q|quran|koran|qur\\\'an)\\s*';
+    pattern += '([\\d]{1,3})';
+    pattern += '(?::\\s*([\\d\\s\\-,]+))?';
+
+    regex = new RegExp(pattern, 'gi');
+    while (match = regex.exec(input)) {
+      let ref = new Reference();
+
+      ref.order   = match.index;
+      ref.text    = match[0];
+      ref.type    = 'quran';
+      ref.chapter = self.getChapter(match[1]);
+      ref.verses  = match[2];
+
+      results.push(ref);
     }
-  });
 
-  // For consistency lets stick to strings
-  return bookIndex.toString();
-}
+    /**
+     * <ar|en chapter> 3: 21
+     * <ar|en chapter> 21-25
+     */
+    pattern = '(?:surat|سورة)?\\s*';
+    pattern += `(${self.chaptersRegexp}):?\\s*`;
+    pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
+    pattern += '([\\d\\s\\-,]+)';
 
-function parse(input) {
-  let results = [];
-  let pattern;
-  let regex;
-  let match;
+    regex = new RegExp(pattern, 'gi');
+    while (match = regex.exec(input)) {
+      let ref = new Reference();
 
-  /**
-   * Q 1:123
-   * Q 11: 123
-   * Q111:123
-   * Quran111:123
-   * Quran 1:123
-   * Koran 1:111
-   * Qur'an 1:111
-   */
-  pattern = '(?:q|quran|koran|qur\\\'an)\\s*';
-  pattern += '([\\d]{1,3})';
-  pattern += '(?::\\s*([\\d\\s\\-,]+))?';
+      ref.order   = match.index;
+      ref.text    = match[0];
+      ref.type    = 'quran';
+      ref.chapter = self.getChapter(match[2] || match[1]);
+      ref.verses  = match[3];
 
-  regex = new RegExp(pattern, 'gi');
-  while (match = regex.exec(input)) {
-    let ref = new Reference();
+      results.push(ref);
+    }
 
-    ref.order = match.index;
-    ref.text = match[0];
-    ref.type = 'quran';
-    ref.chapter = getChapter(match[1]);
-    ref.verses = match[2];
-
-    results.push(ref);
+    return results;
   }
 
   /**
-   * <ar|en chapter> 3: 21
-   * <ar|en chapter> 21-25
+   * Function for building the query to send to GraphQL
    */
-  const chapterList = chapters.map(variations => {
-    return variations.map(bookName => escape(bookName)).join('|');
-  }).join('|');
+  static queryBuilder(verses) {
+    let versesQuery = '';
 
-  pattern = '(?:surat|سورة)?\\s*';
-  pattern += `(${chapterList}):?\\s*`;
-  pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
-  pattern += '([\\d\\s\\-,]+)';
+    Reference.parseVerses(verses).forEach(set => {
+      const start = set[0];
+      const end = set[1];
 
-  regex = new RegExp(pattern, 'gi');
-  while (match = regex.exec(input)) {
-    let ref = new Reference();
+      // If there is an end verse limit needs to be set, otherwise
+      // we will just use a limit: 1
+      const limit = end ? `end: ${end}` : `limit: 1`;
+      versesQuery += `
+        verses${start}: verses(start: ${start}, ${limit}) {
+          number
+          text
+        }
+      `;
+    });
 
-    ref.order = match.index;
-    ref.text = match[0];
-    ref.type = 'quran';
-    ref.chapter = getChapter(match[2] || match[1]);
-    ref.verses = match[3];
-
-    results.push(ref);
-  }
-
-  return results;
-};
-
-/**
- * Splitting the verses up for set parsing
- */
-function splitVerses(verses) {
-  return verses
-    .split(',')
-    .filter(set => !!set)
-    .map(set => set.match(/(\d+)/g, set));
-}
-
-/**
- * Function for building the query to send to GraphQL
- */
-function queryBuilder(verses) {
-  let versesQuery = '';
-  splitVerses(verses).forEach(set => {
-    const start = set[0];
-    const end = set[1];
-
-    // If there is an end verse limit needs to be set, otherwise
-    // we will just use a limit: 1
-    const limit = end ? `end: ${end}` : `limit: 1`;
-    versesQuery += `
-      verses${start}: verses(start: ${start}, ${limit}) {
-        number
-        text
+    // Initialize the GraphQL query
+    return `
+      query ($version: String!, $chapter: Int!) {
+        quran (id: $version) {
+          name
+          direction
+          language
+          chapter (id: $chapter) {
+            id
+            name
+            ${versesQuery}
+          }
+        }
       }
     `;
-  });
-
-  // Initialize the GraphQL query
-  return `
-    query ($version: String!, $chapter: Int!) {
-      quran (id: $version) {
-        name
-        direction
-        language
-        chapter (id: $chapter) {
-          id
-          name
-          ${versesQuery}
-        }
-      }
-    }
-  `;
-}
-
-function renderVerses(verses, res) {
-  let root, verseSets;
-  try {
-    root = res.data.quran.chapter;
-    verseSets = splitVerses(verses);
-  } catch(e) {
-    return false;
   }
 
-  if (!root) return '';
-
-  let html = '';
-  let length = 0;
-  const truncate = 400;
-  verseSets.forEach((set, idx) => {
-    const start = set[0];
-
-    // If the section exists
-    if (root[`verses${start}`] !== null) {
-      root[`verses${start}`].forEach(verse => {
-        if (length <= truncate) {
-          let text = verse.text;
-          const beforeLength = length;
-          length += text.length;
-
-          // Need to truncate this verse
-          if (length > truncate) {
-            const cut = truncate - beforeLength;
-            text = verse.text.substr(0, cut);
-
-            // Trim if mid-word, need to complete the word
-            text = verse.text.substr(0, Math.min(text.length, text.lastIndexOf(' ')));
-            text += ' &hellip;';
-          }
-
-          html += `<span class="verse">${text} <sup>${verse.number}</sup></span> `;
-        }
-      });
-    }
-
-    if (idx < verseSets.length - 1 && length <= truncate) html += ' &hellip; ';
-  });
-
-  return html;
+  _normalize(str) {
+    return str.toLowerCase().trim();
+  }
 }
-
-export default { parse, getChapter, queryBuilder, renderVerses };
-export { getChapter, parse, queryBuilder, renderVerses };
