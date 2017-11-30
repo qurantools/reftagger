@@ -36,19 +36,13 @@
     </div>
 
     <script>
-        // Basic installation
-        var refTagger = {
-            bible: {
-                version: 'injil'
-            }
-        };
+      var refTagger = {};
 
-        (function(d, t) {
-            var g = d.createElement(t),
-                s = d.getElementsByTagName(t)[0];
-            g.src = "../dist/reftagger.js";
-            s.parentNode.insertBefore(g, s);
-        }(document, "script"));
+      (function(d, t) {
+        var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        g.src = "https://cdn.alkotob.org/lib/reftagger.min.js";
+        s.parentNode.insertBefore(g, s);
+      }(document, "script"));
     </script>
 </body>
 

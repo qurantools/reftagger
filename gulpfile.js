@@ -6,6 +6,7 @@ const path          = require('path');
 const isparta       = require('isparta');
 const webpack       = require('webpack');
 const webpackStream = require('webpack-stream');
+const ghpages       = require('gh-pages');
 
 const Instrumenter = isparta.Instrumenter;
 const mochaGlobals = require('./test/setup/.globals');
@@ -249,3 +250,10 @@ gulp.task('bump:patch', function() { return inc('patch'); });
 gulp.task('bump:minor', function() { return inc('minor'); });
 gulp.task('bump:major', function() { return inc('major'); });
 gulp.task('bump', ['bump:patch']);
+
+/**
+ * Publish the example to gh-pages
+ */
+gulp.task('deploy:example', function(cb) {
+  ghpages.publish('examples', { }, cb);
+});
