@@ -11,6 +11,8 @@ a reference to "An-Nas 1-2" it would automatically insert a tooltip for that aya
 so you don't need to link to it manually, and you don't need to google it separately.
 Everything is done inline so you can continue reading.
 
+Here is a [demo](https://alkotob.github.io/reftagger/) of the magic.
+
 ## Installation
 
 Adding Reftagger to your blog or website is easy. Just place a few lines of code
