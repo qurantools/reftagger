@@ -22,9 +22,22 @@ and paste it right before the closing body tag (`</body>`).
   // Basic installation
   var refTagger = {};
 
-  // Configuration options and defaults
+  // Here is the default configuration
   var refTagger = {
-    onPageLoad: true // Load tags on page load
+    language  : 'en', // Language to display the popup
+    onPageLoad: true, // Tag the references on page load
+    iframes   : true, // From match.js
+    exclude   : [],   // Excludes nodes from parse (like script, head, etc)
+
+    // Specify a theme for the popup, you can write your own theme if you
+    // don't prefer the default themes.
+    // Options: dark, light, transparent, <custom>
+    theme: 'alkotob',
+
+    // Specify the version hierarchy, you can omit translations so that it
+    // doesn't use them, if a translation does not contain a book (for example)
+    // it will fallback to the next translation in this list.
+    versions: ['quran', 'injil', 'tma']
   };
 
   (function(d, t) {
@@ -33,6 +46,23 @@ and paste it right before the closing body tag (`</body>`).
     s.parentNode.insertBefore(g, s);
   }(document, "script"));
 </script>
+```
+
+## API
+
+If you need more control of your views you can always disable the initial
+`onPageLoad` attribute in the configuration, and then call `.tag()` once it is
+initialized.
+
+```js
+var refTagger = { onPageLoad: false };
+
+// Then later on call
+refTagger.tag();
+
+// You can pass the actual DOM context to perform updates
+// and it will ignore the rest of the page (great for AJAX sites)
+refTagger.tag(document.querySelector("#dynamic-html"));
 ```
 
 ## Tooltips

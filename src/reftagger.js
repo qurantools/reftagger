@@ -98,7 +98,7 @@ class Reftagger {
    */
   tag(ctx) {
     const self = this;
-    let nodes = this._getTextNodes();
+    let nodes = this._getTextNodes(ctx);
 
     nodes.forEach(node => {
       let references = [];
