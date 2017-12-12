@@ -154,8 +154,4 @@ export default class Bible extends BookBase {
 
     return results;
   }
-
-  _normalize(str) {
-    return str.toLowerCase().trim();
-  }
 }

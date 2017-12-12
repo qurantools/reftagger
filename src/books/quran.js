@@ -234,8 +234,4 @@ export default class Quran extends BookBase {
 
     return results;
   }
-
-  _normalize(str) {
-    return str.toLowerCase().trim();
-  }
 }

@@ -131,4 +131,11 @@ export default class BookBase {
 
     return null;
   }
+
+  /**
+   * Normalizes text for the searching of books and chapters
+   */
+  _normalize(str) {
+    return str.toLowerCase().trim().replace(/\s+/, ' ');
+  }
 }
