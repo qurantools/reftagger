@@ -15,6 +15,7 @@ def require_gem gem_name
 end
 
 require_gem 'nokogiri'
+require_gem 'terminal-table'
 
 def process_bible doc
   collection_id = doc.root['id']
@@ -81,6 +82,20 @@ def update format
   translations = JSON.parse(open(metafile).read)['data']
 
   translations.each do |translation|
+
+    # For updating wiki
+    name = "[#{translation['name']}](https://alkotob.org/#{translation['id']})"
+    file_link = "[#{translation['file']}](https://github.com/alkotob/bible-translations/raw/master/data/#{translation['file']})"
+    @table_rows << [
+      name,
+      format,
+      translation['id'],
+      translation['original'],
+      translation['direction'],
+      translation['language'],
+      file_link
+    ]
+
     filename = "https://raw.githubusercontent.com/alkotob/#{format}-translations/master/data/#{translation['file']}"
     open(filename) do |f|
       doc = Nokogiri::XML(f)
@@ -94,5 +109,32 @@ def update format
   end
 end
 
+# Variable for storing meta infomration for readme
+@table_rows = [['Name', 'Format', 'ID', 'Original', 'Direction', 'Language', 'File'], :separator]
+
 update :bible
 update :quran
+
+### Update the README with translations -----------------------
+
+# Format markdown table
+table = (Terminal::Table.new rows: @table_rows)
+  .to_s
+  .split(/\n/)[1..-2]
+  .join("\n")
+  .gsub('+', '|')
+
+# Update readme
+dir = File.expand_path("../", File.dirname(__FILE__))
+readme_file = File.join(dir, 'README.md')
+text = File.read(readme_file)
+
+contents = []
+text.each_line do |line|
+  break if line.include? '| ID'
+  contents << line
+end
+
+contents << table
+
+File.open(readme_file, 'w') {|f| f.write(contents.join) }

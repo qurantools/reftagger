@@ -29,7 +29,11 @@ class Reftagger {
       iframes: true, // From match.js
       exclude: [], // From match.js
       theme: 'alkotob', // dark, light, transparent, <custom>
-      versions: ['quran', 'injil', 'tma'] // specify the version hierarchy
+
+      // specify the version hierarchy
+      versions: [
+        'quran', 'injil', 'tma', 'zabur', 'sabeel', 'sbleng', 'gnt'
+      ]
     };
   }
 

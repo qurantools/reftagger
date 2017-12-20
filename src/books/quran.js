@@ -4,6 +4,9 @@ import BookBase from './base';
 
 // Import translation configurations
 import original from './quran/quran';
+import qeng59 from './quran/qeng59';
+import qeng63 from './quran/qeng63';
+import qind68 from './quran/qind68';
 
 const CHAPTER_REFS = [
   ["al-fatihah", "the opener"],
@@ -129,7 +132,7 @@ export default class Quran extends BookBase {
     const self = this;
 
     // Translations available
-    self.translations = [original];
+    self.translations = [original, qeng59, qeng63, qind68];
 
     // Masterlist of chapters and titles
     self.chapters = CHAPTER_REFS;

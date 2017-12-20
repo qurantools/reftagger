@@ -5,8 +5,16 @@ import BookBase from './base';
 // Import translation configurations
 import tma from './bible/tma';
 import injil from './bible/injil';
+import gnt from './bible/gnt';
+import sabeel from './bible/sabeel';
+import sbleng from './bible/sbleng';
+import zabur from './bible/zabur';
 
 const BOOK_REFS = {
+  // Stories of the prophets
+  'sbl': ['sabeel'],
+
+  // Standard bible references
   'gen': ['genesis', 'gen', 'ge', 'gn'],
   'exo': ['exodus', 'exo', 'ex', 'exod'],
   'lev': ['leviticus', 'lev', 'le', 'lv'],
@@ -82,7 +90,7 @@ export default class Bible extends BookBase {
     const self = this;
 
     // Translations available
-    self.translations = [injil, tma];
+    self.translations = [injil, tma, gnt, sabeel, sbleng, zabur];
 
     // Masterlist of books and titles
     self.books = BOOK_REFS;

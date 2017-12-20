@@ -69,3 +69,20 @@ refTagger.tag(document.querySelector("#dynamic-html"));
 
 This library uses tippy.js to display its tooltips.  If you already use tippy.js
 this could cause some conflict.  Please let us know if this is an issue for you.
+
+### Available Translations
+
+Here is a list of the available translations and their accessibility online as well as a download link. These are the translations currently available with Reftagger and Alkotob.
+
+| Name                                                   | Format | ID     | Original | Direction | Language | File                                                                                   |
+|--------------------------------------------------------|--------|--------|----------|-----------|----------|----------------------------------------------------------------------------------------|
+| [Βίβλος (GNT)](https://alkotob.org/gnt)                | bible  | gnt    | true     | ltr       | gr       | [gnt.xml](https://github.com/alkotob/bible-translations/raw/master/data/gnt.xml)       |
+| [إنجيل](https://alkotob.org/injil)                     | bible  | injil  | false    | rtl       | ar       | [injil.xml](https://github.com/alkotob/bible-translations/raw/master/data/injil.xml)   |
+| [السَّبِيْلُ](https://alkotob.org/sabeel)                   | bible  | sabeel | false    | rtl       | ar       | [sabeel.xml](https://github.com/alkotob/bible-translations/raw/master/data/sabeel.xml) |
+| [The Path](https://alkotob.org/sbleng)                 | bible  | sbleng | false    | ltr       | en       | [sbleng.xml](https://github.com/alkotob/bible-translations/raw/master/data/sbleng.xml) |
+| [المعنى الصحيح لإنجيل المسيح](https://alkotob.org/tma) | bible  | tma    | false    | rtl       | ar       | [tma.xml](https://github.com/alkotob/bible-translations/raw/master/data/tma.xml)       |
+| [الزَّبُورُ](https://alkotob.org/zabur)                    | bible  | zabur  | false    | rtl       | ar       | [zabur.xml](https://github.com/alkotob/bible-translations/raw/master/data/zabur.xml)   |
+| [Yusuf Ali](https://alkotob.org/qeng59)                | quran  | qeng59 | false    | ltr       | en       | [qeng59.xml](https://github.com/alkotob/bible-translations/raw/master/data/qeng59.xml) |
+| [Transliteration](https://alkotob.org/qeng63)          | quran  | qeng63 | false    | ltr       | en       | [qeng63.xml](https://github.com/alkotob/bible-translations/raw/master/data/qeng63.xml) |
+| [Bahasa Indonesia](https://alkotob.org/qind68)         | quran  | qind68 | false    | ltr       | in       | [qind68.xml](https://github.com/alkotob/bible-translations/raw/master/data/qind68.xml) |
+| [القرآن الكريم](https://alkotob.org/quran)             | quran  | quran  | true     | rtl       | ar       | [quran.xml](https://github.com/alkotob/bible-translations/raw/master/data/quran.xml)   |
