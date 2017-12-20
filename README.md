@@ -70,7 +70,7 @@ refTagger.tag(document.querySelector("#dynamic-html"));
 This library uses tippy.js to display its tooltips.  If you already use tippy.js
 this could cause some conflict.  Please let us know if this is an issue for you.
 
-### Available Translations
+## Available Translations
 
 Here is a list of the available translations and their accessibility online as well as a download link. These are the translations currently available with Reftagger and Alkotob.
 
