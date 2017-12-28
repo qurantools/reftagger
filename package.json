@@ -1,6 +1,6 @@
 {
   "name": "reftagger",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A reftagger for Arabic Holy Books.",
   "author": "Alkotob <alkotob.org>",
   "main": "dist/reftagger.js",
