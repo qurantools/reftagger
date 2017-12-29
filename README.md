@@ -2,6 +2,7 @@
 
 [![Travis build status](http://img.shields.io/travis/alkotob/reftagger.svg?style=flat)](https://travis-ci.org/alkotob/reftagger)
 [![Code Climate](https://codeclimate.com/github/alkotob/reftagger/badges/gpa.svg)](https://codeclimate.com/github/alkotob/reftagger)
+[![Dependency Status](https://beta.gemnasium.com/badges/github.com/alkotob/reftagger.svg)](https://beta.gemnasium.com/projects/github.com/alkotob/reftagger)
 [![Test Coverage](https://codeclimate.com/github/alkotob/reftagger/badges/coverage.svg)](https://codeclimate.com/github/alkotob/reftagger)
 
 A reftagger for all the Quranic and Biblical references you may have.  If you have
