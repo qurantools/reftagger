@@ -1,5 +1,4 @@
 import Tippy from 'tippy.js';
-import BaseBook from './books/base';
 import Quran from './books/quran';
 import tooltipHTML from './templates/tooltip';
 import DOMIterator from './lib/dom-iterator';
@@ -27,7 +26,6 @@ class Reftagger {
       exclude: [], // From match.js
       theme: 'alkotob', // dark, light, transparent, <custom>
     };
-    console.log("ctx", ctx)
   }
 
   /**
@@ -169,8 +167,7 @@ class Reftagger {
     const startNode = node.splitText(startIdx);
     const permalink = ref.permalink(baseApiUrl, author);
 
-    console.log("startNode ", startNode)
-    console.log("permalink ", permalink)
+    //console.log("permalink ", permalink)
 
     let refEl = document.createElement('a');
     refEl.setAttribute('href', permalink);
@@ -232,7 +229,7 @@ class Reftagger {
         const chapter   = el.getAttribute('data-chapter');
         const verses    = el.getAttribute('data-verses');
         const permalink = el.getAttribute('data-permalink');
-        console.log("********* ",matchText," - ",chapter," - ",verses," - ",permalink)
+        //console.log("********* ",matchText," - ",chapter," - ",verses," - ",permalink)
 
         // Update the social media buttons
         const fb = document.getElementById('alkotob-social-fb');
@@ -255,12 +252,12 @@ class Reftagger {
         fetch(permalink)
           .then((res) => { return res.json() })
           .then((data) => {
-            console.log("data ",data);
+            //console.log("data ",data);
 
             let html = Quran.render(data);
 
             if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
-            console.log("html ", html);
+            //console.log("html ", html);
 
             document.getElementById('alkotob-verse-text').innerHTML = html;
 

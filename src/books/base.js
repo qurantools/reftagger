@@ -1,15 +1,4 @@
-import Reference from '../lib/reference';
-
 export default class BookBase {
-
-  /**
-   * Function for building the query
-   */
-  static queryBuilder(type, verses) {
-    let versesQuery = '';
-
-    return quranQuery;
-  }
 
   /**
    * Function for rendering response for a book

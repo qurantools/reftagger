@@ -3,7 +3,7 @@
 }
 
 .tippy-tooltip.alkotob-theme {
-    direction: rtl;
+    //direction: rtl;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     background-color: #fff;
     width: 100%;
@@ -40,7 +40,6 @@
     #alkotob-verse-text {
         display: block;
         padding: 8px 12px;
-        direction: ltr;
     }
     #alkotob-copyright {
         position: absolute;
@@ -61,6 +60,7 @@
             color: #333;
             font-size: 12px;
         }
+        text-align: right;
     }
     #alkotob-share {
         position: absolute;

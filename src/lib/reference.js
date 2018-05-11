@@ -6,7 +6,6 @@ class Reference {
 
     this._opts = {
       text: null,
-      type: null,
       chapter: null,
       verses: null
     };
@@ -14,14 +13,6 @@ class Reference {
 
   set text(val) {
     this._opts.text = val.trim();
-  }
-
-  set type(type) {
-    if (['quran'].indexOf(type) === -1) {
-      throw 'You must specify a proper book type';
-    }
-
-    this._opts.type = type;
   }
 
   set chapter(num) {
@@ -39,10 +30,6 @@ class Reference {
 
   get text() {
     return this._opts.text;
-  }
-
-  get type() {
-    return this._opts.type;
   }
 
   get chapter() {
@@ -73,7 +60,7 @@ class Reference {
       verseList.push(this.chapter * 1000 + verse);
     });
 
-    console.log("permalink ", author, this.chapter, verseList.join());
+    //console.log("permalink ", author, this.chapter, verseList.join());
 
     return baseApiUrl + '?author=' + author + '&verse_list=' + verseList.join();
   }

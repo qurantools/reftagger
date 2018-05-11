@@ -4,7 +4,6 @@ import BookBase from './base';
 
 // Import translation configurations
 import original from './quran/quran';
-//import qeng59 from './quran/qeng59';
 import qeng63 from './quran/qeng63';
 import qind68 from './quran/qind68';
 import qind90 from './quran/qind90';
@@ -144,18 +143,17 @@ export default class Quran extends BookBase {
         self.chapters[idx].push(...translation.chapters[idx]);
       });
     });
-    console.log("chapters",self.chapters)
+    //console.log("chapters",self.chapters)
 
     // Create a regex once for use later when tagging
     self.chaptersRegexp = Array.prototype.concat(...self.chapters)
       .map(e => escape(e))
       .join('|');
 
-    console.log("chaptersRegexp",self.chaptersRegexp)
+    //console.log("chaptersRegexp",self.chaptersRegexp)
 
     // Get the masterlist codes to use for associations
     self.chapterIds = Object.keys(self.chapters);
-    console.log("chapterIds",self.chapterIds)
   }
 
   /**
@@ -193,6 +191,11 @@ export default class Quran extends BookBase {
     let regex;
 
     /**
+     * K 2:123
+     * Kur'an 2:123
+     * Kur'an2:123
+     * Kuran 2:123
+     * Kuran2:123
      * Q 1:123
      * Q 11: 123
      * Q111:123
@@ -200,48 +203,41 @@ export default class Quran extends BookBase {
      * Quran 1:123
      * Koran 1:111
      * Qur'an 1:111
-     * K 2:123
-     * Kur'an 2:123
-     * Kur'an2:123
-     * Kuran 2:123
-     * Kuran2:123
+     * Sure 2:123
+     * Sûre 2:123
+     * Sure2:123
+     * Surat 2:123
      */
-    pattern = '(?:q|k|quran|kuran|koran|qur\\\'an|kur\\\'an)\\s*';
+    pattern = '(?:q|k|quran|kuran|koran|qur\\\'an|kur\\\'an|sure|sûre|surat|سورة)\\s*';
     pattern += '([\\d]{1,3})';
     pattern += '(?::\\s*([\\d\\s\\-,]+))?';
 
-    console.log("parse(input)", input)
+    //console.log("parse(input)", input)
     regex = new RegExp(pattern, 'gi');
     while (match = regex.exec(input)) {
-      console.log("match", match)
       let ref = new Reference();
 
       ref.order   = match.index;
       ref.text    = match[0];
-      ref.type    = 'quran';
       ref.chapter = self.getChapter(match[1]);
       ref.verses  = match[2];
-      console.log("ref", ref)
       results.push(ref);
     }
 
     /**
      * <tr|en|ar chapter> 3: 21
-     * <tr|en|ar chapter> 3: 21
      * <tr|en|ar chapter> 21-25
      */
-    pattern = '(?:sûre|sure|surat|سورة)?\\s*';
+    pattern = '(?:surat|sûre|sure|سورة)?\\s*';
     pattern += `(${self.chaptersRegexp}):?\\s*`;
     pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
     pattern += '([\\d\\s\\-,]+)';
-
     regex = new RegExp(pattern, 'gi');
     while (match = regex.exec(input)) {
       let ref = new Reference();
 
       ref.order   = match.index;
       ref.text    = match[0];
-      ref.type    = 'quran';
       ref.chapter = self.getChapter(match[2] || match[1]);
       ref.verses  = match[3];
 
