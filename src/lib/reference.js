@@ -56,6 +56,10 @@ class Reference {
   permalink(baseApiUrl, author) {
     let verseList = [];
 
+    //To fix some crash
+    if(this.verses === null)
+      return;
+
     this.getNumbers(this.verses).forEach(verse => {
       verseList.push(this.chapter * 1000 + verse);
     });

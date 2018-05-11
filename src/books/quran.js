@@ -191,8 +191,10 @@ export default class Quran extends BookBase {
     let regex;
 
     /**
-     * K 2:123
+     * KK 2:123
+     * KK2:123
      * Kur'an 2:123
+     * Kur'an 2:123,125-127
      * Kur'an2:123
      * Kuran 2:123
      * Kuran2:123
@@ -208,7 +210,7 @@ export default class Quran extends BookBase {
      * Sure2:123
      * Surat 2:123
      */
-    pattern = '(?:q|k|quran|kuran|koran|qur\\\'an|kur\\\'an|sure|sûre|surat|سورة)\\s*';
+    pattern = '(?:q|kk|quran|kuran|koran|qur\\\'an|kur\\\'an|sure|sûre|surat|سورة)\\s*';
     pattern += '([\\d]{1,3})';
     pattern += '(?::\\s*([\\d\\s\\-,]+))?';
 
