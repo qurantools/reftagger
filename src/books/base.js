@@ -6,7 +6,7 @@ export default class BookBase {
   static render(verses) {
     let html       = '';
     let length     = 0;
-    const truncate = 400;
+    const truncate = 1000; //show max 1000 chars
 
     if (!verses) return null;
 
@@ -15,14 +15,12 @@ export default class BookBase {
           let text = verse.content;
           const beforeLength = length;
           length += text.length;
-
           // Need to truncate this verse
           if (length > truncate) {
             const cut = truncate - beforeLength;
-            text = verse.text.substr(0, cut);
-
+            text = verse.content.substr(0, cut);
             // Trim if mid-word, need to complete the word
-            text = verse.text.substr(0, Math.min(text.length, text.lastIndexOf(' ')));
+            text = verse.content.substr(0, Math.min(text.length, text.lastIndexOf(' ')));
             text += ' &hellip;';
           }
 
