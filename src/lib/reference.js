@@ -7,7 +7,6 @@ class Reference {
     this._opts = {
       text: null,
       type: null,
-      book: null,
       chapter: null,
       verses: null
     };
@@ -18,7 +17,7 @@ class Reference {
   }
 
   set type(type) {
-    if (['quran', 'bible'].indexOf(type) === -1) {
+    if (['quran'].indexOf(type) === -1) {
       throw 'You must specify a proper book type';
     }
 
@@ -27,10 +26,6 @@ class Reference {
 
   set chapter(num) {
     this._opts.chapter = num.toString().trim();
-  }
-
-  set book(name) {
-    this._opts.book = name.trim();
   }
 
   set verses(str) {
@@ -48,10 +43,6 @@ class Reference {
 
   get type() {
     return this._opts.type;
-  }
-
-  get book() {
-    return this._opts.book;
   }
 
   get chapter() {
@@ -75,12 +66,64 @@ class Reference {
       .map(set => set.match(/(\d+)/g, set));
   }
 
-  permalink(version) {
-    return [
-      'https://alkotob.org',
-      version,
-      [this.book, this.chapter, this.verses].filter(item => !! item).join('.'),
-    ].join('/') + '?ref=reftagger';
+  permalink(baseApiUrl, author) {
+    let verseList = [];
+
+    this.getNumbers(this.verses).forEach(verse => {
+      verseList.push(this.chapter * 1000 + verse);
+    });
+
+    console.log("permalink ", author, this.chapter, verseList.join());
+
+    return baseApiUrl + '?author=' + author + '&verse_list=' + verseList.join();
+  }
+
+  getNumbers(stringNumbers) {
+    //https://codereview.stackexchange.com/questions/26125/getting-all-number-from-a-string-like-this-1-2-5-9
+
+    //if you had assignments, better if they are individually var'ed
+    var nums = [];
+    var entries = stringNumbers.split(',');
+    var length = entries.length;
+
+    //for variabes that don't, comma separated
+    var i, entry, low, high, range;
+
+    for (i = 0; i < length; i++) {
+      entry = entries[i];
+
+      //shortcut for testing a -1
+      if (!~entry.indexOf('-')) {
+        //absence of dash, must be a number
+        //force to a number using +
+        nums.push(+entry);
+      } else {
+        //presence of dash, must be range
+        range = entry.split('-');
+
+        //force to numbers
+        low = +range[0];
+        high = +range[1];
+
+        //XOR swap, no need for an additional variable. still 3 steps though
+        //http://en.wikipedia.org/wiki/XOR_swap_algorithm
+        if(high < low){
+          low = low ^ high;
+          high = low ^ high;
+          low = low ^ high;
+        }
+
+        //push for every number starting from low
+        while (low <= high) {
+          nums.push(low++);
+        }
+      }
+    }
+
+    //edit to sort list at the end
+    return nums.sort(function (a, b) {
+      return a - b;
+    });
   }
 }
 

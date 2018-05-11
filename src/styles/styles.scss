@@ -35,10 +35,12 @@
         padding: 4px 8px;
         font-weight: bold;
         line-height: 26px;
+        text-align: right;
     }
     #alkotob-verse-text {
         display: block;
         padding: 8px 12px;
+        direction: ltr;
     }
     #alkotob-copyright {
         position: absolute;

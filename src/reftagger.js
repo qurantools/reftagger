@@ -1,14 +1,12 @@
 import Tippy from 'tippy.js';
-import GraphQLFetch from 'graphql-fetch';
 import BaseBook from './books/base';
 import Quran from './books/quran';
-import Bible from './books/bible';
 import tooltipHTML from './templates/tooltip';
 import DOMIterator from './lib/dom-iterator';
 import I18n from './i18n';
-import _get from 'lodash.get';
 
-const fetch = GraphQLFetch('https://alkotob.org/query');
+const author = 274877906944; // Erhan Aktaş
+const baseApiUrl = "https://securewebserver.net/jetty/qttest/rest/translations/list";
 
 /**
  * The main entry point for the reftagger of Alkotob
@@ -19,22 +17,17 @@ class Reftagger {
     this._tippy       = null;
     this._ctx         = ctx;
     this._i18n        = new I18n();
-    this.bible        = new Bible;
     this.quran        = new Quran;
 
     // Initialize the default settings for the class
     this._settings = {
-      language: 'en',
+      language: 'tr',
       onPageLoad: true,
       iframes: true, // From match.js
       exclude: [], // From match.js
       theme: 'alkotob', // dark, light, transparent, <custom>
-
-      // specify the version hierarchy
-      versions: [
-        'quran', 'injil', 'tma', 'zabur', 'sabeel', 'sbleng', 'gnt'
-      ]
     };
+    console.log("ctx", ctx)
   }
 
   /**
@@ -109,7 +102,6 @@ class Reftagger {
 
       // Parse out all the references
       references.push(...self.quran.parse(node.textContent));
-      references.push(...self.bible.parse(node.textContent));
 
       references
         .sort((a, b) => b.order - a.order) // Sort in reverse order
@@ -138,8 +130,7 @@ class Reftagger {
     let style = document.createElement('link');
     style.setAttribute('rel', 'stylesheet');
     style.setAttribute('type', 'text/css');
-    style.setAttribute('href', 'https://cdn.alkotob.org/lib/reftagger.min.css');
-    // style.setAttribute('href', '/dist/reftagger.min.css');
+    style.setAttribute('href', 'reftagger.min.css');
     document.getElementsByTagName('head')[0].appendChild(style);
 
     // Append tooltip html
@@ -175,20 +166,17 @@ class Reftagger {
     const startIdx = node.textContent.indexOf(ref.text);
     if (startIdx === -1) return;
 
-    const version = ref.type === 'quran' ?
-      this.quran.getVersion(ref.chapter, this.settings.versions) :
-      this.bible.getVersion(ref.book, this.settings.versions);
-
     const startNode = node.splitText(startIdx);
-    const permalink = ref.permalink(version);
+    const permalink = ref.permalink(baseApiUrl, author);
+
+    console.log("startNode ", startNode)
+    console.log("permalink ", permalink)
 
     let refEl = document.createElement('a');
     refEl.setAttribute('href', permalink);
     refEl.setAttribute('target', '_blank');
     refEl.setAttribute('class', 'alkotob-ayah');
     refEl.setAttribute('data-text', ref.text);
-    refEl.setAttribute('data-type', ref.type);
-    refEl.setAttribute('data-book', ref.book);
     refEl.setAttribute('data-chapter', ref.chapter);
     refEl.setAttribute('data-verses', ref.verses);
     refEl.setAttribute('data-permalink', permalink);
@@ -241,18 +229,20 @@ class Reftagger {
 
         const el        = self._tippy.getReferenceElement(this);
         const matchText = el.getAttribute('data-text');
-        const bookType  = el.getAttribute('data-type');
-        const book      = el.getAttribute('data-book');
         const chapter   = el.getAttribute('data-chapter');
         const verses    = el.getAttribute('data-verses');
         const permalink = el.getAttribute('data-permalink');
+        console.log("********* ",matchText," - ",chapter," - ",verses," - ",permalink)
 
         // Update the social media buttons
         const fb = document.getElementById('alkotob-social-fb');
         fb.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(permalink)}`);
 
         const tw = document.getElementById('alkotob-social-tw');
-        tw.setAttribute('href', `https://twitter.com/intent/tweet?url=${encodeURIComponent(permalink)}`);
+        tw.setAttribute('href', `https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Fkurancalis.com%3A63342%2Fkurancalis-web%2F&ref_src=twsrc%5Etfw&text=Kuran%20%C3%87al%C4%B1%C5%9F%20-%20&tw_p=tweetbutton?url=${encodeURIComponent(permalink)}&via=kurancalis`);
+
+        const gg = document.getElementById('alkotob-social-gg');
+        gg.setAttribute('href', `https://plus.google.com/share?app=110&url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
         const read = document.getElementById('alkotob-readmore-link');
         read.setAttribute('href', permalink);
@@ -262,40 +252,31 @@ class Reftagger {
 
         self._tippy.update(this);
 
-        const query = BaseBook.queryBuilder(bookType, verses);
-        const version = bookType === 'quran' ?
-          self.quran.getVersion(chapter, self.settings.versions) :
-          self.bible.getVersion(book, self.settings.versions);
+        fetch(permalink)
+          .then((res) => { return res.json() })
+          .then((data) => {
+            console.log("data ",data);
 
-        const queryVars = {
-          version,
-          chapter: parseInt(chapter)
-        };
+            let html = Quran.render(data);
 
-        if (bookType !== 'quran') queryVars.book = book;
+            if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
+            console.log("html ", html);
 
-        fetch(query, queryVars).then(res => {
-          if (res.errors) {
-            console.log(res.errors);
-            return;
-          }
+            document.getElementById('alkotob-verse-text').innerHTML = html;
 
-          let html = bookType === 'quran' ?
-            Quran.render(_get(res, 'data.quran.chapter')) :
-            Bible.render(_get(res, 'data.bible.book.chapter'));
+            self._tippy.loading = false;
+            self._tippy.update(this);
 
-          if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
-
-          // Update UI text
-          verseText.innerHTML = html;
-
-          self._tippy.loading = false;
-          self._tippy.update(this);
-        });
+        }).catch( function(err) {
+          console.log(err)
+        })
       },
 
       onHide() {
-        self._tippy.loading = false;
+        //close tooltip after 3 second later
+        setTimeout(function () {
+          self._tippy.loading = false;
+        },3000)
       },
 
       onHidden() {
