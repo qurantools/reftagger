@@ -214,6 +214,7 @@ class Reftagger {
     const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
+      delay: [200, 20],
       position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
@@ -270,10 +271,7 @@ class Reftagger {
       },
 
       onHide() {
-        //close tooltip after 3 second later
-        setTimeout(function () {
           self._tippy.loading = false;
-        },3000)
       },
 
       onHidden() {
