@@ -5,7 +5,7 @@ import DOMIterator from './lib/dom-iterator';
 import I18n from './i18n';
 
 const author = 274877906944; // Erhan Aktaş
-const baseApiUrl = "https://securewebserver.net/jetty/qttest/rest/translations/list";
+const baseApiURL = "https://securewebserver.net/jetty/qttest/rest";
 
 /**
  * The main entry point for the reftagger of Alkotob
@@ -73,13 +73,69 @@ class Reftagger {
 
     // Tag references on page load
     if (self.settings.onPageLoad) {
-      window.onload = () => self.tag();
+      window.onload = () => {
+        self.tag();
+        self.setAuthors();
+        self.setLanguages();
+      }
     }
 
     // Update translation settings
     this._i18n.lang(this._settings.language);
 
     self._initialized = true;
+  }
+
+  setLanguages() {
+    // languages
+    let languages = [
+      {text : "Türkçe", value : "tr"},
+      {text : "İngilizce", value : "en"},
+      {text : "Arapça", value : "ar"}
+    ];
+
+    let select = document.getElementById('language-list');
+    console.log("select ", select, languages);
+
+    let defaultOption = document.createElement('option');
+    defaultOption.text = 'Dil Seçiniz';
+    select.append(defaultOption);
+    select.selectedIndex = 0;
+
+    languages.forEach(language =>{
+        let option = document.createElement('option');
+        option.innerHTML = language.text;
+        option.value = language.value;
+        select.append(option);
+      });
+
+      console.log("select ", select);
+  }
+
+  setAuthors() {
+    //fetch authors on init
+    fetch(baseApiURL + "/authors")
+      .then((res) => { return res.json() })
+      .then((authors) => {
+        let select = document.getElementById('translation-list');
+        console.log("select ", select, authors);
+
+        let defaultOption = document.createElement('option');
+        defaultOption.text = 'Meal Seçiniz';
+        select.append(defaultOption);
+        select.selectedIndex = 0;
+
+        authors.forEach(author =>{
+          let option = document.createElement('option');
+          option.innerHTML = author.name;
+          option.value = author.id;
+          select.append(option);
+        });
+
+        console.log("select ", select);
+      }).catch( function(err) {
+      console.log(err)
+    });
   }
 
   /**
@@ -165,7 +221,7 @@ class Reftagger {
     if (startIdx === -1) return;
 
     const startNode = node.splitText(startIdx);
-    const permalink = ref.permalink(baseApiUrl, author);
+    const permalink = ref.permalink(baseApiURL, author);
 
     //console.log("permalink ", permalink)
 
@@ -214,7 +270,7 @@ class Reftagger {
     const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
-      delay: [200, 20],
+      delay: [200, 100],
       position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',

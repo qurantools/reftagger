@@ -191,30 +191,17 @@ export default class Quran extends BookBase {
     let regex;
 
     /**
-     * KK 2:123
-     * KK2:123
      * Kur'an 2:123
+     * Kur'an 2:123,124
+     * Kur'an 2:123-127
      * Kur'an 2:123,125-127
-     * Kur'an2:123
-     * Kuran 2:123
-     * Kuran2:123
-     * Q 1:123
-     * Q 11: 123
-     * Q111:123
-     * Quran111:123
-     * Quran 1:123
-     * Koran 1:111
-     * Qur'an 1:111
-     * Sure 2:123
-     * Sûre 2:123
-     * Sure2:123
-     * Surat 2:123
+     * Similar usage as Kur'an (above) for Quran, Qur'an, Koran, and Kuran
+     * Chapter:(Verse|Verse_Group) -> 2:3 or 2:3,4 or 2:3-5,7 ...
      */
-    pattern = '(?:q|kk|quran|kuran|koran|qur\\\'an|kur\\\'an|sure|sûre|surat|سورة)\\s*';
+    pattern = '(?:quran|kuran|koran|qur\\\'an|kur\\\'an)\\s+';
     pattern += '([\\d]{1,3})';
     pattern += '(?::\\s*([\\d\\s\\-,]+))?';
 
-    //console.log("parse(input)", input)
     regex = new RegExp(pattern, 'gi');
     while (match = regex.exec(input)) {
       let ref = new Reference();
@@ -223,28 +210,36 @@ export default class Quran extends BookBase {
       ref.text    = match[0];
       ref.chapter = self.getChapter(match[1]);
       ref.verses  = match[2];
+      //console.log("REF first ",ref)
       results.push(ref);
     }
 
-    /**
-     * <tr|en|ar chapter> 3: 21
-     * <tr|en|ar chapter> 21-25
+    /***
+     * Bakara 123
+     * Bakara 123,124
+     * Bakara 123-127
+     * Bakara 123,125-127
+     * Surat Bakara 123,125-127
+     * Bakara Suresi 7. Ayet  //"Suresi" and ".Ayet" is optional
+     * Bakara Suresi 2-7
+     * Bakara 4,5-7
      */
-    pattern = '(?:surat|sûre|sure|سورة)?\\s*';
-    pattern += `(${self.chaptersRegexp}):?\\s*`;
-    pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
-    pattern += '([\\d\\s\\-,]+)';
-    regex = new RegExp(pattern, 'gi');
-    while (match = regex.exec(input)) {
-      let ref = new Reference();
+     pattern = '(?:surat|سورة)?\\s*';
+     pattern += `(${self.chaptersRegexp}):?\\s*(?: Suresi(?=[ -:]))?`;
+     pattern += '(?:([\\d]{1,3})\\s*:)?\\s+';
+     pattern += '([\\d\\s\\-,]+)(:?\\. Ayet)?';
+     regex = new RegExp(pattern, 'gi');
+     while (match = regex.exec(input)) {
+     let ref = new Reference();
 
-      ref.order   = match.index;
-      ref.text    = match[0];
-      ref.chapter = self.getChapter(match[2] || match[1]);
-      ref.verses  = match[3];
+     ref.order   = match.index;
+     ref.text    = match[0];
+     ref.chapter = self.getChapter(match[2] || match[1]);
+     ref.verses  = match[3];
+     //console.log("REF second ",ref)
+     results.push(ref);
+     }
 
-      results.push(ref);
-    }
 
     return results;
   }

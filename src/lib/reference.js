@@ -66,7 +66,7 @@ class Reference {
 
     //console.log("permalink ", author, this.chapter, verseList.join());
 
-    return baseApiUrl + '?author=' + author + '&verse_list=' + verseList.join();
+    return baseApiUrl + '/translations/list?author=' + author + '&verse_list=' + verseList.join();
   }
 
   getNumbers(stringNumbers) {
