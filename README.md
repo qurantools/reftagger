@@ -11,7 +11,7 @@ Verse Reference, yazınızdaki Kur'an ayet referansınıza otomatik link eklemey
   inceleyebiliyor olacaksınız.
 
 ## Verse Reference Kullanımı
-Referans Formatları:
+Verse Reference ile 3 şekilde referans vermeniz mümkün. Bunları 3 kategori altında inceledik.
 
 Not: Ağağıdaki ifadelerde Sure_no 1-114 arası Sure numarasını, Ayet_no ise ilgili Surenin ayet numarası 
 ifade etmektedir. Ayet_no için değişik alternatifler mevcut: Tek bir sayı ile, virgülle ayrılmış sayılar ile
@@ -65,7 +65,7 @@ Bakara Suresi 4. Ayet
 
 Örnek kullanımlar için [demo](http://quran.tr.cx/verse-reference/) sayfasını inceleyiniz.
 
-#### Kurulum
+## Kurulum
 
 Verse Referance kurulumu oldukça kolay. Aşağıdaki kodu kopyalayıp sitenizin (`</body>`) etiketi öncesinde bir yere yapıştırmanız yeterli.
 
