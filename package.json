@@ -1,8 +1,8 @@
 {
   "name": "reftagger",
-  "version": "0.2.0",
-  "description": "A reftagger for Arabic Holy Books.",
-  "author": "Alkotob <alkotob.org>",
+  "version": "1.0.0",
+  "description": "Kur'an Ayetlerine referans",
+  "author": "Ilerian Software Technologies Ltd.",
   "main": "dist/reftagger.js",
   "scripts": {
     "test": "gulp",
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/alkotob/reftagger.git"
+    "url": "https://github.com/qurantools/verse-reference.git"
   },
   "keywords": [],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alkotob/reftagger/issues"
+    "url": "https://github.com/qurantools/verse-reference/issues"
   },
-  "homepage": "https://github.com/alkotob/reftagger",
+  "homepage": "https://github.com/qurantools/verse-reference",
   "devDependencies": {
     "babel-core": "6.26.0",
     "babel-loader": "7.1.2",
