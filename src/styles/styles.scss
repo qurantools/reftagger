@@ -78,6 +78,9 @@
     #select-group{
         margin: 5px 10px;
     }
+    #select-group select{
+        height: 2em;
+    }
     /* Loading Spinner */
     .sk-folding-cube {
         margin: 20px auto;
