@@ -184,7 +184,7 @@ class Reftagger {
     let style = document.createElement('link');
     style.setAttribute('rel', 'stylesheet');
     style.setAttribute('type', 'text/css');
-    style.setAttribute('href', 'http://quran.tr.cx/verse-reference/reftagger.min.css');
+    style.setAttribute('href', 'http://quran.tr.cx/verse-reference/verse_reference.min.css');
     document.getElementsByTagName('head')[0].appendChild(style);
 
     // Append tooltip html

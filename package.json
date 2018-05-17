@@ -1,9 +1,9 @@
 {
-  "name": "reftagger",
+  "name": "verse-reference",
   "version": "1.0.0",
-  "description": "Kur'an Ayetlerine referans",
+  "description": "Kur'an Ayetlerine otomatik referans verme",
   "author": "Ilerian Software Technologies Ltd.",
-  "main": "dist/reftagger.js",
+  "main": "dist/verse-reference.js",
   "scripts": {
     "test": "gulp",
     "lint": "gulp lint",
