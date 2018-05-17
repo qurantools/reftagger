@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Kur'an Ayetlerine otomatik referans verme",
   "author": "Ilerian Software Technologies Ltd.",
-  "main": "dist/verse-reference.js",
+  "main": "dist/verse_reference.js",
   "scripts": {
     "test": "gulp",
     "lint": "gulp lint",
