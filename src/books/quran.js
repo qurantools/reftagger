@@ -217,8 +217,8 @@ export default class Quran extends BookBase {
      * Chapter:(Verse|Verse_Group) -> 2:3 or 2:3,4 or 2:3-5,7 ...
      */
 
-    pattern = '(\\s*([\\d]{1,3})';
-    pattern += '(?::([\\d\\-,]+))\\s*)*';
+    pattern = '\\s*([\\d]{1,3})';
+    pattern += '(?::([\\d\\-,]+))\\s*';
 
     regex = new RegExp(pattern, 'gi');
     while (match = regex.exec(input)) {
