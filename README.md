@@ -1,47 +1,47 @@
 # Verse Reference
 
-Verse Reference, yazınızdaki Kur'an ayet referansınıza otomatik link eklemeyi ve link üzerine gelince
- açılır pencerede ile ilgili ayet(ler)e dair meallerin görünmesini sağlar. Bu sayede referanslara tek tek link ekleme ve
- bu linkleri açılır pencerede gösterme gibi zahmetli bir işten kurtulmuş olacksınız. 
- Üstelik bu özelliği edinmek çok kolay: aşağıda verdiğimiz kod parçasını sisteminize entegre etmek. Kullanımı da 
- oldukça kolay. Geniş referans sözcük dağarcığı ile ile Kur'an ayetlerine referans vererek ayetlere dair meallere 
- anında ulaşarak Kur'an çalışmalarınızı hiç olmadığı kadar zevkli hale getirebilirsiniz. Referans Ayet 
- üzerine gelince otomatik olarak açılan açılır pencere ile meal bilgisi görüyor olacaksınız.
- Aynı zamanda açılır penceredeki meal seçimi bölümü ile Ayet(ler)e dair meal bilgisini farklı mealler üzerinden de
-  inceleyebiliyor olacaksınız.
+Verse Reference, yazınızdaki Kur'an ayet referansınıza otomatik link eklemeyi ve link 
+üzerine gelince açılır pencerede ile ilgili ayet(ler)e dair meallerin görünmesini sağlar. 
+Bu sayede referanslara tek tek link ekleme ve bu linkleri açılır pencerede gösterme gibi 
+zahmetli bir işten kurtulmuş olacaksınız. Üstelik bu özelliği edinmek çok kolay: aşağıda
+verdiğimiz kod parçasını sisteminize entegre etmek. Kullanımı da oldukça kolay. Geniş 
+referans sözcük dağarcığı ile ile Kur'an ayetlerine referans vererek ayetlere dair 
+meallere anında ulaşarak Kur'an çalışmalarınızı hiç olmadığı kadar zevkli hale 
+getirebilirsiniz. Referans Ayet üzerine gelince otomatik olarak açılan açılır pencere 
+ile meal bilgisi görüyor olacaksınız. Aynı zamanda açılır penceredeki meal seçimi 
+bölümü ile Ayet(ler)e dair meal bilgisini farklı mealler üzerinden de inceleyebiliyor 
+olacaksınız.
 
-## Verse Reference Kullanımı
-Verse Reference ile 3 şekilde referans vermeniz mümkün. Bunları 3 kategori altında inceledik.
+## Nasıl Kullanılır?
+Verse Reference ile Kur'an Ayetlerine değişik şekillerde referans vermek mümkün. Bunları 2 kategori altında inceledik.
 
-Not: Ağağıdaki ifadelerde Sure_no 1-114 arası Sure numarasını, Ayet_no ise ilgili Surenin ayet numarası 
-ifade etmektedir. Ayet_no için değişik alternatifler mevcut: Tek bir sayı ile, virgülle ayrılmış sayılar ile
-ya da tire ile ayrılmış sayılar ile Ayet_no gösterimini yapabilirsiniz. Örneklerde durum daha net anlaşılacaktır.
+Not: Ağağıdaki ifadelerde Sure_no 1-114 arası Sure numarasını, Ayet_no ise ilgili Surenin ayet numarasını/numaralarını
+ifade etmektedir. Ayet_no için değişik yazım şekilleri mevcut: Tek bir sayı ile, virgülle ayrılmış sayılar ile ya da 
+tire ile ayrılmış sayılar ile Ayet_no gösterimini yapabilirsiniz. Örnekleri inceleyiniz.
 
-#### 1.  (Kur'an|Kuran|Quran|Qur'an|Koran) Sure_no:Ayet_no
+#### 1. Sure_no:Ayet_no 
 
-Kur'an 2:123          //Kur'an 2. Sure 123. Ayeti temsil etmekte
+2:123    //Kur'an 2. Sure 123. Ayeti temsil etmekte
 
-Kur'an 2:123,124      //Kur'an 2. Sure 123 ve 124. Ayetleri temsil etmekte (virgül ',' tek tek ayetleri belirtmek için)
+2:123,124    //Kur'an 2. Sure 123 ve 124. Ayetleri temsil etmekte (virgül ',' tek tek ayetleri belirtmek için)
 
-Kur'an 2:123-127      //Kur'an 2. Sure 123,124,125,126 ve 127. Ayetleri temsil etmekte (tire '-' ayet grubu aralığındaki tüm ayetleri ifade etmek için)
+2:123-127    //Kur'an 2. Sure 123,124,125,126 ve 127. Ayetleri temsil etmekte (tire '-' ayet grubu aralığındaki tüm ayetleri ifade etmek için)
 
-Kur'an 2:123,129-131  //Kur'an 2. Sure 123,129,130 ve 131. Ayetleri temsil etmekte
-
-Benzer kullanım Quran, Qur'an, Koran, ve Kuran için başlayan ifadeler için de geçerli
+2:123,129-131    //Kur'an 2. Sure 123,129,130 ve 131. Ayetleri temsil etmekte
 
 #### 2.  Sure_Adı (Suresi) Ayet_no(. Ayet) 
 
-Fatiha 1,2,5-7         //Fatiha Suresi 1,2,5,6 ve 7 Ayetlerini temsil eder
+Fatiha 1,2,5-7    //Fatiha Suresinin 1,2,5,6 ve 7 Ayetlerini temsil eder
 
-Bakara 123             //Bakara Suresi 123. Ayeti temsil eder 
+Bakara 123    //Bakara Suresinin 123. Ayeti temsil eder
 
-Bakara 123,124         //Bakara Suresi 123 ve 124. Ayetleri temsil eder 
+Bakara 123,124    //Bakara Suresinin 123 ve 124. Ayetleri temsil eder
 
-Bakara 123-127         //Bakara Suresi 123,124,125,126 ve 127. Ayetleri temsil eder 
+Bakara 123-127    //Bakara Suresinin 123,124,125,126 ve 127. Ayetleri temsil eder
 
-Bakara 123,129-131     //Bakara Suresi 123,129,130 ve 131. Ayetleri temsil eder  
+Bakara 123,129-131    //Bakara Suresinin 123,129,130 ve 131. Ayetleri temsil eder
 
-Bakara Suresi 7. Ayet  //"Suresi" and ".Ayet" şeklinde sözcükler ile de kullanıabilirsiniz. Bu sözcükler seçeneğe bağlı
+Bakara Suresi 7. Ayet    //Bakara Suresinin 7. Ayetini temsil eder. "Suresi" ve ".Ayet" sözcüklerinin isteğe bağlıdır.
 
 Bakara Suresi 2-7
 
@@ -53,15 +53,15 @@ Bakara 4. Ayet
 
 Bakara Suresi 4. Ayet
 
-#### 3.  Sure_no:Ayet_no
+Ra'd 3-7
 
-2:123          //Kur'an 2. Sure 123. Ayeti temsil etmekte
+Ra'd 3,7
 
-2:123,124      //Kur'an 2. Sure 123 ve 124. Ayetleri temsil etmekte (virgül ',' tek tek ayetleri belirtmek için)
+Ra'd Suresi 3-7
 
-2:123-127      //Kur'an 2. Sure 123,124,125,126 ve 127. Ayetleri temsil etmekte (tire '-' ayet grubu aralığındaki tüm ayetleri ifade etmek için)
+Ra'd Suresi 3-7
 
-2:123,129-131  //Kur'an 2. Sure 123,129,130 ve 131. Ayetleri temsil etmekte
+Ra'd Suresi 3,7. Ayet
 
 #### Daha yalın bir anlatımla...
 **Tek Ayete Referans Verme**
@@ -72,21 +72,21 @@ Bakara Suresi 4. Ayet
 بِالرُّوحِ مِنْ أَمْرِهِ عَلَى مَنْ يَشَاءُ مِنْ عِبَادِهِ أَنْ أَنْذِرُوا أَنَّهُ لَا إِلَهَ إِلَّا أَنَا فَاتَّقُونِ ﴾ [النحل: 2].
  
 
-Kur’an 7:7 Kur’an 2:123 , Kuran 2:123 , Kuran 8:3 ve Kuran 2:2-8
-Qur’an 110:2 , Qur’an 19:4 , Quran 2:225 ve Quran 1:3 
+Kur’an 7:7 Kur’an 2:123, Kuran 2:123, Kuran 8:3 ve Kuran 2:2-8
+Qur’an 110:2, Qur’an 19:4, Quran 2:225 ve Quran 1:3 
 
 
 **Virgül ile Ayrılmış Şekliyle Birçok Ayete Referans Verme**
 
-Fatiha 2,3,4,5,7 , Bakara 21,88,89,90,220,221,250 ve Nas 2,3,4, Asr 1,2,3
+Fatiha 2,3,4,5,7, Bakara 21,88,89,90,220,221,250 ve Nas 2,3,4, Asr 1,2,3
 
 **Tire işareti ile Belli bir Aralık için Birçok Ayete Referans Verme**
 
-Fatiha 2-5 , Bakara 88-90 , Bakara 13-18 , Nas 2-5 ve Kevser 1-3
+Fatiha 2-5, Bakara 88-90, Bakara 13-18, Nas 2-5 ve Kevser 1-3
 
 **Virgül ve Tire işaretleri ile Birçok Ayete Referans Verme**
 
-Fatiha 2-5,7 , Bakara 88-90,99,102-107 , Bakara 6,13-18 , Nas 1-3,5 , Ya sin 4-10,18 , Maun 1-3,5 , Muhammed 4-6,8 ve Fetih 2-7,10
+Fatiha 2-5,7, Bakara 88-90,99,102-107, Bakara 6,13-18, Nas 1-3,5, Ya sin 4-10,18, Maun 1-3,5, Muhammed 4-6,8 ve Fetih 2-7,10
 
 Not: En fazla 1000 harf açılır ekranda gösterilmekte, fazlalık traşlanmakta.
 
@@ -95,13 +95,13 @@ Not: En fazla 1000 harf açılır ekranda gösterilmekte, fazlalık traşlanmakt
 
 **Farklı Dillerde Referans Verme**
 
-Fatiha 1-3, 5 , The opening 1-3, 5 , The opener 1-3, 5 ve Al-Faatihah 1-3, 5
+Fatiha 1-3,5, The opening 1-3, 5 , The opener 1-3,5 ve Al-Faatihah 1-3,5
 
-Al-baqarah 3-7 ve 10 ve Bakara 3-7, 10
+Al-baqarah 3-7 ve 10 ve Bakara 3-7,10
 
-Enbiya 4-8, 12 , Al-anbya 4-8, 12 ve The prophets 4-8, 12
+Enbiya 4-8,12 , Al-anbya 4-8,12 ve The prophets 4-8,12
 
-Mulk 2-4,6 , al-mulk 2-4,6 ve The sovereignty 2-4,6
+Mulk 2-4,6, al-mulk 2-4,6 ve The sovereignty 2-4,6
 
 
 Örnek kullanımlar için [**demo**](http://quran.tr.cx/verse-reference/) sayfasını inceleyiniz.
