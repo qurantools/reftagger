@@ -26,6 +26,16 @@ class Reftagger {
       exclude: [], // From match.js
       theme: 'alkotob', // dark, light, transparent, <custom>
     };
+
+    // languages
+    this.languages =  [
+      {text : "Türkçe", value : "tr"},
+      {text : "İngilizce", value : "en"},
+      {text : "Arapça", value : "ar"}
+    ];
+
+    // authors
+    this.authors = [];
   }
 
   /**
@@ -75,8 +85,9 @@ class Reftagger {
     if (self.settings.onPageLoad) {
       window.onload = () => {
         self.tag();
-        self.setAuthors();
-        self.setLanguages();
+        self.setLanguagesHtml();
+        self.getAuthors();
+
       }
     }
 
@@ -86,55 +97,57 @@ class Reftagger {
     self._initialized = true;
   }
 
-  setLanguages() {
-    // languages
-    let languages = [
-      {text : "Türkçe", value : "tr"},
-      {text : "İngilizce", value : "en"},
-      {text : "Arapça", value : "ar"}
-    ];
-
+  setLanguagesHtml() {
     let select = document.getElementById('language-list');
-    console.log("select ", select, languages);
 
     let defaultOption = document.createElement('option');
     defaultOption.text = 'Dil Seçiniz';
+    defaultOption.value = 'all';
     select.append(defaultOption);
     select.selectedIndex = 0;
 
-    languages.forEach(language =>{
+    this.languages.forEach(language =>{
         let option = document.createElement('option');
         option.innerHTML = language.text;
         option.value = language.value;
         select.append(option);
       });
-
-      console.log("select ", select);
   }
 
-  setAuthors() {
+  getAuthors() {
     //fetch authors on init
     fetch(baseApiURL + "/authors")
       .then((res) => { return res.json() })
       .then((authors) => {
-        let select = document.getElementById('translation-list');
-        console.log("select ", select, authors);
+        this.authors = authors;
+        this.setAuthorsHtml(this.authors, null);
 
-        let defaultOption = document.createElement('option');
-        defaultOption.text = 'Meal Seçiniz';
-        select.append(defaultOption);
-        select.selectedIndex = 0;
-
-        authors.forEach(author =>{
-          let option = document.createElement('option');
-          option.innerHTML = author.name;
-          option.value = author.id;
-          select.append(option);
-        });
-
-        console.log("select ", select);
       }).catch( function(err) {
       console.log(err)
+    });
+  }
+
+  setAuthorsHtml(authors, selectedHtmlItem){
+    let select;
+    if(selectedHtmlItem == null) {
+      select = document.getElementById('translation-list');
+    } else {
+      select = selectedHtmlItem;
+
+      //remove option items if exist
+      select.options.length = 0;
+    }
+
+    let defaultOption = document.createElement('option');
+    defaultOption.text = 'Meal Seçiniz';
+    select.append(defaultOption);
+    select.selectedIndex = 0;
+
+    authors.forEach(author =>{
+      let option = document.createElement('option');
+      option.innerHTML = author.name;
+      option.value = author.id;
+      select.append(option);
     });
   }
 
@@ -270,7 +283,7 @@ class Reftagger {
     const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
-      delay: [200, 100],
+      delay: [200, 150],
       position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
@@ -340,6 +353,62 @@ class Reftagger {
         </div>`;
       }
     });
+
+    //UPDATE TOOLTIP CONTENT
+    document.querySelector("body").addEventListener("change", function(event) {
+      let select = event.target;
+
+      // change on language-list
+      if (
+        select.tagName.toLowerCase() === "select" &&
+        select.id === "language-list"
+      ) {
+        const filteredAuthors = select.value == 'all' ? self.authors : self.authors.filter(author => author.language == select.value);
+        const selectAuthorsHtml = select.closest(".tippy-tooltip-content").childNodes[7].childNodes[3]; // to get selected authors html
+
+        self.setAuthorsHtml(filteredAuthors, selectAuthorsHtml);
+      }
+      // change on translation-list
+      else if (
+        select.tagName.toLowerCase() === "select" &&
+        select.id === "translation-list"
+      ) {
+        let author = select.value;
+
+        //verse references
+        let nodeList = document.getElementsByTagName("sup");
+
+        let verseList = [];
+        for(let i=0; i<nodeList.length; i++){
+
+          let values = nodeList.item(i).innerHTML.split(':');
+          let chapter = parseInt(values[0]);
+          let verse = parseInt(values[1]);
+
+          verseList.push(chapter * 1000 + verse);
+        }
+
+        //remove duplicates
+        verseList = Array.from(new Set(verseList));
+
+        let permalink = baseApiURL + '/translations/list?author=' + author + '&verse_list=' + verseList.join();
+
+        fetch(permalink)
+          .then((res) => { return res.json() })
+          .then((data) => {
+            let html = Quran.render(data);
+            if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
+
+            let element = select.closest(".tippy-tooltip-content").childNodes[9];
+            element.innerHTML = html;
+
+          }).catch( function(err) {
+          console.log(err)
+        })
+
+      }
+    });
+
   }
 }
 
