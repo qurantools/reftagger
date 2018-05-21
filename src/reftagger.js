@@ -283,7 +283,7 @@ class Reftagger {
     const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
-      delay: [200, 150],
+      delay: 300,
       position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
