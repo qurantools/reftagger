@@ -24,7 +24,7 @@ const template = `
       <a target="_blank" href="http://kurancalis.com">kurancalis.com</a>
     </div>
     <div id="alkotob-readmore">
-      <a id="alkotob-readmore-link" target="_blank" href="http://kurancalis.com">Detaylı inceleme &raquo;</a>
+      <a id="alkotob-readmore-link" target="_blank" href="#">Detaylı inceleme &raquo;</a>
     </div>
   </div>
 `;

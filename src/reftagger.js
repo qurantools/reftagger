@@ -312,7 +312,8 @@ class Reftagger {
         gg.setAttribute('href', `https://plus.google.com/share?app=110&url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
         const read = document.getElementById('alkotob-readmore-link');
-        read.setAttribute('href', permalink);
+        const firstVerse = permalink.split("=")[2].split(",")[0];
+        read.setAttribute('href', "http://kurancalis.com/#!/verse/display/" + firstVerse);
 
         // Update the reference in the tooltip
         reference.innerHTML = matchText.trim();
