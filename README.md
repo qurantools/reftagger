@@ -128,7 +128,7 @@ Verse Referance kurulumu oldukça kolay. Aşağıdaki kodu kopyalayıp sitenizin
 
 #### Wordpress için Kurulum
 
-Yönetici (`Admin`) Panelinden -> Görünüm (`Appearance`) -> Editör (`Editor`) yolunu takip ederek tema dosyalarından 
+Yönetici (`Admin`) Panelinden -> Görünüm (`Appearance`) -> Düzenleyici (`Editor`) yolunu takip ederek tema dosyalarından 
 (theme files) `footer.php` dosyasını açarak yukarıdaki kodu (`</body>`) etiketi öncesinde yapıştırmanız gerekmekte.
 
 

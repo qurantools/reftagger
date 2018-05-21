@@ -25,7 +25,7 @@ let chapters = [
 		"maide"
 	],
 	[
-		"en'am"
+		"en'am", "enam", "en’am"
 	],
 	[
 		"araf"
@@ -34,7 +34,7 @@ let chapters = [
 		"enfal"
 	],
 	[
-		"tevbe/bara'e"
+		"tevbe/bara'e", "tevbe/barae", "tevbe/bara’e"
 	],
 	[
 		"yunus"
@@ -46,7 +46,7 @@ let chapters = [
 		"yusuf"
 	],
 	[
-		"ra'd"
+		"ra'd", "rad", "ra’d"
 	],
 	[
 		"i̇brahim"
@@ -268,7 +268,7 @@ let chapters = [
 		"tarık"
 	],
 	[
-		"a'la"
+		"a'la", "ala", "a’la"
 	],
 	[
 		"ğaşiye"
