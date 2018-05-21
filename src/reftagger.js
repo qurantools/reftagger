@@ -376,20 +376,24 @@ class Reftagger {
         let author = select.value;
 
         //verse references
-        let nodeList = document.getElementsByTagName("sup");
-
         let verseList = [];
-        for(let i=0; i<nodeList.length; i++){
+        let nodes = select.closest(".tippy-tooltip-content").childNodes[9].childNodes;
+        nodes.forEach(x=> {
+          if(x.className=="verse")
+          {
+            x.childNodes.forEach(y=> {
 
-          let values = nodeList.item(i).innerHTML.split(':');
-          let chapter = parseInt(values[0]);
-          let verse = parseInt(values[1]);
+              if(y.tagName == "SUP"){
 
-          verseList.push(chapter * 1000 + verse);
-        }
+                let values = y.innerHTML.split(':');
+                let chapter = parseInt(values[0]);
+                let verse = parseInt(values[1]);
 
-        //remove duplicates
-        verseList = Array.from(new Set(verseList));
+                verseList.push(chapter * 1000 + verse);
+              }
+            })
+          }
+        });
 
         let permalink = baseApiURL + '/translations/list?author=' + author + '&verse_list=' + verseList.join();
 
