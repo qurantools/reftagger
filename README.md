@@ -143,6 +143,11 @@ Yönetici (`Admin`) Panelinden -> Görünüm (`Appearance`) -> Düzenleyici (`Ed
 Uzantılar (`Extensions`) -> Tema Yöneticisi (`Template manager`) -> sol bölümdeki Şablonlar (`Templates`) yolunu takip ederek
 aktif temayı seçiniz. Aktif temanın `index.php` dosyasını açarak yukarıdaki kodu (`</body>`) etiketi öncesinde yapıştırmanız gerekmekte.
 
+#### Drupal için Kurulum
+Drupal yönetici panelinden (`admin panel`) -> Yapı (`Structure`) -> Blok (`Blocks`) yolunu takip ederek
+Blok Ekle (`Add block`) ekle bağlantısına tıklayınız. Açılan penceredeki veri girişi alanına yukarıdaki script kodunu yapıştırınız. 
+Veri giriş formatını full HTML yapınız ve blok'a bir isim vererek, örneğin "Verse Reference", blok'u kaydediniz. Hepsi bu kadar.
+
 
 #### Dikkat!
 Açılır pencere (tooltips) gösterimi için tippy.js kütüphanesi kullanılmıştır. Eğer sisteminizde hali hazırda bu kütüphane yüklü ise 
