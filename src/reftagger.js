@@ -101,14 +101,14 @@ class Reftagger {
     let select = document.getElementById('language-list');
 
     let defaultOption = document.createElement('option');
-    defaultOption.text = 'Dil Seçiniz';
+    defaultOption.text = this._i18n.get('Dil Seçiniz');
     defaultOption.value = 'all';
     select.append(defaultOption);
     select.selectedIndex = 0;
 
     this.languages.forEach(language =>{
         let option = document.createElement('option');
-        option.innerHTML = language.text;
+        option.innerHTML = this._i18n.get(language.text);
         option.value = language.value;
         select.append(option);
       });
@@ -139,7 +139,7 @@ class Reftagger {
     }
 
     let defaultOption = document.createElement('option');
-    defaultOption.text = 'Meal Seçiniz';
+    defaultOption.text = this._i18n.get('Meal Seçiniz');
     select.append(defaultOption);
     select.selectedIndex = 0;
 
@@ -312,8 +312,9 @@ class Reftagger {
         gg.setAttribute('href', `https://plus.google.com/share?app=110&url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
         const read = document.getElementById('alkotob-readmore-link');
-        const firstVerse = permalink.split("=")[2].split(",")[0];
-        read.setAttribute('href', "http://kurancalis.com/#!/verse/display/" + firstVerse);
+        const shownVerse = permalink.split("=")[2].split(",")[0];
+        read.setAttribute('href', "http://kurancalis.com/#!/verse/display/" + shownVerse);
+        read.innerHTML = self._i18n.get("Detaylı inceleme »");
 
         // Update the reference in the tooltip
         reference.innerHTML = matchText.trim();
@@ -364,6 +365,7 @@ class Reftagger {
         select.tagName.toLowerCase() === "select" &&
         select.id === "language-list"
       ) {
+
         const filteredAuthors = select.value == 'all' ? self.authors : self.authors.filter(author => author.language == select.value);
         const selectAuthorsHtml = select.closest(".tippy-tooltip-content").childNodes[7].childNodes[3]; // to get selected authors html
 
