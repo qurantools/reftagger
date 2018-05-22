@@ -117,6 +117,12 @@ Verse Referance kurulumu oldukça kolay. Aşağıdaki kodu kopyalayıp sitenizin
 ```js
 <script>
   var refTagger = {};
+ 
+  // Temel Ayarlar
+  var refTagger = {
+    language  : 'tr', // Açılır pencerede geçerli olan dil
+    onPageLoad: true, // Sayfa yüklenince otomatik referans verme
+  };
 
   (function(d, t) {
     var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
