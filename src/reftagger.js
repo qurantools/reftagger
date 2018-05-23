@@ -283,14 +283,18 @@ class Reftagger {
     const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
-      delay: 300,
+      delay: [100,2000],
       position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
       interactive: true,
       theme: self.settings.theme,
+      //followCursor: true, //position replacement fix
       flipDuration: 0, // prevent a transition once tooltip size changes and updates position
       onShow() {
+        //store opened item at local storage
+        localStorage.setItem('tippyInstance', self._tippy);
+
         if (self._tippy.loading) return;
         self._tippy.loading = true;
 
@@ -342,7 +346,24 @@ class Reftagger {
       },
 
       onHide() {
-          self._tippy.loading = false;
+        self._tippy.loading = false;
+        localStorage.removeItem('tippyInstance');
+      },
+
+      wait: function (show, event) {
+        //tippy instance store
+        let instances = self._tippy.store;
+
+        //hide all popup before
+        instances.forEach(instance=>{
+          self._tippy.hide(instance.popper);
+        });
+
+        setTimeout(() => {
+          // show tippy popup
+          show();
+        }, 0);
+
       },
 
       onHidden() {
@@ -415,6 +436,19 @@ class Reftagger {
 
       }
     });
+
+    document.querySelector("body").addEventListener("click", function(event) {
+      let select = event.target;
+
+      if (
+        select.tagName.toLowerCase() === "select" &&
+        select.id === "translation-list"
+      ) {
+        //set style
+        select.closest(".tippy-tooltip-content").childNodes[9].style.minHeight = '275px';
+      }
+    });
+
 
   }
 }
