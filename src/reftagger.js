@@ -283,7 +283,7 @@ class Reftagger {
     const verseText = document.getElementById('alkotob-verse-text');
 
     self._tippy = Tippy('.alkotob-ayah', {
-      delay: [100,2000],
+      delay: [200,2000],
       position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
@@ -445,7 +445,7 @@ class Reftagger {
         select.id === "translation-list"
       ) {
         //set style
-        select.closest(".tippy-tooltip-content").childNodes[9].style.minHeight = '275px';
+        select.closest(".tippy-tooltip-content").childNodes[9].style.minHeight = '300px';
       }
     });
 
