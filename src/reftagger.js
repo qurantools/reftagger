@@ -289,7 +289,7 @@ class Reftagger {
       html: '#alkotob-tooltip',
       interactive: true,
       theme: self.settings.theme,
-      followCursor: true, //position replacement fix
+      //followCursor: true, //position replacement fix
       flipDuration: 0, // prevent a transition once tooltip size changes and updates position
       onShow() {
         //store opened item at local storage
