@@ -85,9 +85,9 @@ class Reftagger {
     if (self.settings.onPageLoad) {
       window.onload = () => {
         self.tag();
-        self.setLanguagesHtml();
-        self.getAuthors();
 
+        //fetch authors
+        self.getAuthors();
       }
     }
 
@@ -97,9 +97,12 @@ class Reftagger {
     self._initialized = true;
   }
 
-  setLanguagesHtml() {
-    let select = document.getElementById('language-list');
+  getLanguageHTML() {
+    //Create and append select list
+    const select = document.createElement("select");
+    select.id = "language-list";
 
+    //Create option and append select list
     let defaultOption = document.createElement('option');
     defaultOption.text = this._i18n.get('Dil Seçiniz');
     defaultOption.value = 'all';
@@ -107,11 +110,13 @@ class Reftagger {
     select.selectedIndex = 0;
 
     this.languages.forEach(language =>{
-        let option = document.createElement('option');
-        option.innerHTML = this._i18n.get(language.text);
-        option.value = language.value;
-        select.append(option);
-      });
+      let option = document.createElement('option');
+      option.innerHTML = this._i18n.get(language.text);
+      option.value = language.value;
+      select.append(option);
+    });
+
+    return select;
   }
 
   getAuthors() {
@@ -120,24 +125,25 @@ class Reftagger {
       .then((res) => { return res.json() })
       .then((authors) => {
         this.authors = authors;
-        this.setAuthorsHtml(this.authors, null);
-
       }).catch( function(err) {
       console.log(err)
     });
   }
 
-  setAuthorsHtml(authors, selectedHtmlItem){
+  getSetAuthorsHTML(authors, selectHtml){
     let select;
-    if(selectedHtmlItem == null) {
-      select = document.getElementById('translation-list');
+
+    if(selectHtml == null) {
+      select = document.createElement("select");
+      select.id = "translation-list";
     } else {
-      select = selectedHtmlItem;
+      select = selectHtml;
 
       //remove option items if exist
       select.options.length = 0;
     }
 
+    //Create option and append select list
     let defaultOption = document.createElement('option');
     defaultOption.text = this._i18n.get('Meal Seçiniz');
     select.append(defaultOption);
@@ -149,6 +155,9 @@ class Reftagger {
       option.value = author.id;
       select.append(option);
     });
+
+    if(selectHtml == null)
+      return select;
   }
 
   /**
@@ -298,7 +307,7 @@ class Reftagger {
         if (self._tippy.loading) return;
         self._tippy.loading = true;
 
-        const el        = self._tippy.getReferenceElement(this);
+        const el        = this._reference;
         const matchText = el.getAttribute('data-text');
         const chapter   = el.getAttribute('data-chapter');
         const verses    = el.getAttribute('data-verses');
@@ -306,24 +315,29 @@ class Reftagger {
         //console.log("********* ",matchText," - ",chapter," - ",verses," - ",permalink)
 
         // Update the social media buttons
-        const fb = document.getElementById('alkotob-social-fb');
+        const fb = this.querySelector('#alkotob-social-fb');
         fb.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(permalink)}`);
 
-        const tw = document.getElementById('alkotob-social-tw');
+        const tw = this.querySelector('#alkotob-social-tw');
         tw.setAttribute('href', `https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Fkurancalis.com%3A63342%2Fkurancalis-web%2F&ref_src=twsrc%5Etfw&text=Kuran%20%C3%87al%C4%B1%C5%9F%20-%20&tw_p=tweetbutton?url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
-        const gg = document.getElementById('alkotob-social-gg');
+        const gg = this.querySelector('#alkotob-social-gg');
         gg.setAttribute('href', `https://plus.google.com/share?app=110&url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
-        const read = document.getElementById('alkotob-readmore-link');
+        const read = this.querySelector('#alkotob-readmore-link');
         const shownVerse = permalink.split("=")[2].split(",")[0];
         read.setAttribute('href', "http://kurancalis.com/#!/verse/display/" + shownVerse);
         read.innerHTML = self._i18n.get("Detaylı inceleme »");
 
         // Update the reference in the tooltip
-        reference.innerHTML = matchText.trim();
+        this.querySelector('#alkotob-reference').innerHTML = matchText.trim();
 
-        self._tippy.update(this);
+        const selectDIV = this.querySelector('#language-list');
+        if(selectDIV == null) {
+          const selectGroup = this.querySelector("#select-group");
+          selectGroup.appendChild(self.getLanguageHTML());
+          selectGroup.appendChild(self.getSetAuthorsHTML(self.authors, null))
+        }
 
         fetch(permalink)
           .then((res) => { return res.json() })
@@ -335,10 +349,10 @@ class Reftagger {
             if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
             //console.log("html ", html);
 
-            document.getElementById('alkotob-verse-text').innerHTML = html;
+            const content = this.querySelector('#alkotob-verse-text');
+            content.innerHTML = html;
 
             self._tippy.loading = false;
-            self._tippy.update(this);
 
         }).catch( function(err) {
           console.log(err)
@@ -351,13 +365,14 @@ class Reftagger {
       },
 
       wait: function (show, event) {
-        //tippy instance store
-        let instances = self._tippy.store;
+        //hide visible tooltips
+        for (const popper of document.querySelectorAll('.tippy-popper')) {
+          const instance = popper._tippy;
 
-        //hide all popup before
-        instances.forEach(instance=>{
-          self._tippy.hide(instance.popper);
-        });
+          if (instance.state.visible) {
+            instance.hide()
+          }
+        }
 
         setTimeout(() => {
           // show tippy popup
@@ -388,9 +403,9 @@ class Reftagger {
       ) {
 
         const filteredAuthors = select.value == 'all' ? self.authors : self.authors.filter(author => author.language == select.value);
-        const selectAuthorsHtml = select.closest(".tippy-tooltip-content").childNodes[7].childNodes[3]; // to get selected authors html
+        const selectAuthorsHtml = event.target.nextElementSibling;
 
-        self.setAuthorsHtml(filteredAuthors, selectAuthorsHtml);
+        self.getSetAuthorsHTML(filteredAuthors, selectAuthorsHtml);
       }
       // change on translation-list
       else if (
@@ -401,8 +416,10 @@ class Reftagger {
 
         //verse references
         let verseList = [];
-        let nodes = select.closest(".tippy-tooltip-content").childNodes[9].childNodes;
-        nodes.forEach(x=> {
+        let contentNode = event.target.parentNode.nextElementSibling;
+        let contentNodeChilds = contentNode.childNodes;
+
+        contentNodeChilds.forEach(x=> {
           if(x.className=="verse")
           {
             x.childNodes.forEach(y=> {
@@ -427,8 +444,7 @@ class Reftagger {
             let html = Quran.render(data);
             if (!html) html = `<span>${self._i18n.get('notFound')}</span>`;
 
-            let element = select.closest(".tippy-tooltip-content").childNodes[9];
-            element.innerHTML = html;
+            contentNode.innerHTML = html;
 
           }).catch( function(err) {
           console.log(err)
@@ -445,10 +461,23 @@ class Reftagger {
         select.id === "translation-list"
       ) {
         //set style
-        select.closest(".tippy-tooltip-content").childNodes[9].style.minHeight = '290px';
+        event.target.parentNode.nextElementSibling.style.minHeight = '290px';
       }
     });
 
+    /*
+     //Close tooltip on scroll
+     window.addEventListener('scroll', () => {
+     for (const popper of document.querySelectorAll('.tippy-popper')) {
+     const instance = popper._tippy;
+
+     if (instance.state.visible) {
+     instance.popperInstance.disableEventListeners()
+     instance.hide()
+     }
+     }
+     });
+     */
 
   }
 }
