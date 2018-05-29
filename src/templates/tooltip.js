@@ -7,7 +7,8 @@ const template = `
     </div>
     <div id="alkotob-reference"></div>
     <!--<div class="bismillah">﷽</div>-->
-    <div id="select-group"></div>
+    <div id="select-authors"></div>
+    <div id="select-translations"></div>
     <div id="alkotob-verse-text">
    
       <div class="sk-folding-cube">

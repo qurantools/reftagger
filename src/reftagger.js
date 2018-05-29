@@ -136,6 +136,20 @@ class Reftagger {
     if(selectHtml == null) {
       select = document.createElement("select");
       select.id = "translation-list";
+
+      select.addEventListener("mousedown", function(){
+        if(select.options.length>8){select.size=8;};
+        console.log(select)
+      });
+
+      select.addEventListener("change", function(){
+        select.size=0;
+      });
+
+      select.addEventListener("blur", function(){
+        select.size=0
+      });
+
     } else {
       select = selectHtml;
 
@@ -293,13 +307,14 @@ class Reftagger {
 
     self._tippy = Tippy('.alkotob-ayah', {
       delay: [200,1000],
-      position: 'auto',
       arrow: true,
       html: '#alkotob-tooltip',
       interactive: true,
+      interactiveBorder: 20, //from closing from clumsy mouse movements
+      placement: 'auto',
       theme: self.settings.theme,
       //followCursor: true, //position replacement fix
-      flipDuration: 0, // prevent a transition once tooltip size changes and updates position
+      //flip: false,
       onShow() {
         //store opened item at local storage
         localStorage.setItem('tippyInstance', self._tippy);
@@ -334,9 +349,10 @@ class Reftagger {
 
         const selectDIV = this.querySelector('#language-list');
         if(selectDIV == null) {
-          const selectGroup = this.querySelector("#select-group");
-          selectGroup.appendChild(self.getLanguageHTML());
-          selectGroup.appendChild(self.getSetAuthorsHTML(self.authors, null))
+          const selectAuthors = this.querySelector("#select-authors");
+          selectAuthors.appendChild(self.getLanguageHTML());
+          const selectTranslations = this.querySelector("#select-translations");
+          selectTranslations.appendChild(self.getSetAuthorsHTML(self.authors, null));
         }
 
         fetch(permalink)
@@ -403,7 +419,7 @@ class Reftagger {
       ) {
 
         const filteredAuthors = select.value == 'all' ? self.authors : self.authors.filter(author => author.language == select.value);
-        const selectAuthorsHtml = event.target.nextElementSibling;
+        const selectAuthorsHtml = event.target.parentNode.nextElementSibling.childNodes.item(0);
 
         self.getSetAuthorsHTML(filteredAuthors, selectAuthorsHtml);
       }
@@ -461,7 +477,7 @@ class Reftagger {
         select.id === "translation-list"
       ) {
         //set style
-        event.target.parentNode.nextElementSibling.style.minHeight = '290px';
+        event.target.parentNode.nextElementSibling.style.minHeight = '85px';
       }
     });
 
