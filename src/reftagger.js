@@ -138,16 +138,20 @@ class Reftagger {
       select.id = "translation-list";
 
       select.addEventListener("mousedown", function(){
-        if(select.options.length>8){select.size=8;};
-        console.log(select)
+        if(select.options.length>8){
+          select.size=8;
+          select.style.height = '10em';
+        }
       });
 
       select.addEventListener("change", function(){
         select.size=0;
+        select.style.height = '2em';
       });
 
       select.addEventListener("blur", function(){
-        select.size=0
+        select.size=0;
+        select.style.height = '2em';
       });
 
     } else {
