@@ -5,7 +5,7 @@ import DOMIterator from './lib/dom-iterator';
 import I18n from './i18n';
 
 const author = 274877906944; // Erhan Aktaş
-const baseApiURL = "https://securewebserver.net/jetty/qttest/rest";
+const baseApiURL = "https://securewebserver.net/jetty/qt/rest";
 
 /**
  * The main entry point for the reftagger of Alkotob
@@ -224,7 +224,7 @@ class Reftagger {
     let style = document.createElement('link');
     style.setAttribute('rel', 'stylesheet');
     style.setAttribute('type', 'text/css');
-    style.setAttribute('href', 'http://quran.tr.cx/verse-reference/verse_reference.min.css');
+    style.setAttribute('href', 'https://quran.tr.cx/verse-reference/verse_reference.min.css');
     document.getElementsByTagName('head')[0].appendChild(style);
 
     // Append tooltip html
@@ -338,14 +338,14 @@ class Reftagger {
         fb.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(permalink)}`);
 
         const tw = this.querySelector('#alkotob-social-tw');
-        tw.setAttribute('href', `https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Fkurancalis.com%3A63342%2Fkurancalis-web%2F&ref_src=twsrc%5Etfw&text=Kuran%20%C3%87al%C4%B1%C5%9F%20-%20&tw_p=tweetbutton?url=${encodeURIComponent(permalink)}&via=kurancalis`);
+        tw.setAttribute('href', `https://twitter.com/intent/tweet?original_referer=https%3A%2F%2Fkurancalis.com%3A63342%2Fkurancalis-web%2F&ref_src=twsrc%5Etfw&text=Kuran%20%C3%87al%C4%B1%C5%9F%20-%20&tw_p=tweetbutton?url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
         const gg = this.querySelector('#alkotob-social-gg');
         gg.setAttribute('href', `https://plus.google.com/share?app=110&url=${encodeURIComponent(permalink)}&via=kurancalis`);
 
         const read = this.querySelector('#alkotob-readmore-link');
         const shownVerse = permalink.split("=")[2].split(",")[0];
-        read.setAttribute('href', "http://kurancalis.com/#!/verse/display/" + shownVerse);
+        read.setAttribute('href', "https://kurancalis.com/#!/verse/display/" + shownVerse);
         read.innerHTML = self._i18n.get("Detaylı inceleme »");
 
         // Update the reference in the tooltip
